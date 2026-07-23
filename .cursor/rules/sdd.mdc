@@ -1,0 +1,20 @@
+---
+description: Workflow Spec-Driven Development — fonte da verdade em specs/
+alwaysApply: true
+---
+
+# Spec-Driven Development
+
+Antes de escrever ou alterar código de feature:
+
+1. Ler `.specify/memory/constitution.md` e `AGENTS.md`
+2. Usar a feature ativa em `specs/` (`ready` / `in-progress`)
+3. Seguir `tasks.md`; marcar `[x]` só após verificar
+
+Fluxo: **specify → clarify → plan → tasks → implement**.
+
+- `spec.md` = what/why (sem stack)
+- `plan.md` = how (stack/arquitetura)
+- Sem spec/plan/tasks: criar artefatos antes de codar
+- Divergência código↔spec: atualizar a spec primeiro
+- Templates em `.specify/templates/`
