@@ -1,4 +1,9 @@
-"""Spatiotemporal correlation for audio↔video events (C/D)."""
+"""Session correlation for audio↔video events (C/D, feature 002).
+
+Primary path: same ``session_id`` within the time window (audio and video of
+the same consultation). The geographic path (haversine) is kept as a legacy
+utility from feature 001 and used only when both events lack ``session_id``.
+"""
 
 from __future__ import annotations
 
@@ -47,6 +52,21 @@ def _event_ts(event: dict[str, Any]) -> datetime:
     raise KeyError("event needs timestamp/tempo/ts")
 
 
+def same_session(
+    audio_event: dict[str, Any],
+    video_event: dict[str, Any],
+    *,
+    window_minutes: float = DEFAULT_WINDOW_MINUTES,
+) -> bool:
+    """True if both events carry the same session_id within the time window."""
+    sid_a = audio_event.get("session_id")
+    sid_v = video_event.get("session_id")
+    if not sid_a or not sid_v or sid_a != sid_v:
+        return False
+    delta = abs((_event_ts(audio_event) - _event_ts(video_event)).total_seconds())
+    return delta <= window_minutes * 60.0
+
+
 def within_correlation(
     audio_event: dict[str, Any],
     video_event: dict[str, Any],
@@ -54,7 +74,9 @@ def within_correlation(
     radius_m: float = DEFAULT_RADIUS_M,
     window_minutes: float = DEFAULT_WINDOW_MINUTES,
 ) -> bool:
-    """True if audio and video events share location/time windows."""
+    """Primary: session match. Fallback (legacy 001): geo radius + window."""
+    if audio_event.get("session_id") or video_event.get("session_id"):
+        return same_session(audio_event, video_event, window_minutes=window_minutes)
     alat, alon = _event_coords(audio_event)
     vlat, vlon = _event_coords(video_event)
     if haversine_m(alat, alon, vlat, vlon) > radius_m:

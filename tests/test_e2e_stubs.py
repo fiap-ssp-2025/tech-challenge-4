@@ -33,9 +33,8 @@ def test_e2e_pipeline_with_stubs(monkeypatch, dummies):
     assert cd["corroborado"] is True
     assert "indicativo, não veredito" in cd["nota_ocorrencia"]
     assert result["a12"]["tipo_relato"] in {
-        "agressao",
-        "ameaca",
-        "perseguicao",
+        "violencia_domestica",
+        "sofrimento_emocional",
         "outro",
     }
     assert result["a3"].get("stub") is True

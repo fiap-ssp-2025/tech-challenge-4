@@ -1,22 +1,26 @@
-"""Weighted priority score for C/D fusion.
+"""Weighted triage score for C/D fusion (feature 002 — consulta).
 
-Weights are documented rules (not learned). Clarified in /clarify — last schema change.
+Weights are documented rules (not learned). Sum = 1.00 — adjust only here.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-# Soma = 1.00 — ajustar só neste dict.
 SCORE_WEIGHTS: dict[str, float] = {
-    "relato": 0.25,  # tipo_relato grave (agressao / ameaca)
-    "sofrimento": 0.25,  # A3
-    "violencia": 0.25,  # V3
-    "postura": 0.15,  # V2 (proxy mais fraco)
-    "corroboracao": 0.10,  # match espaçotemporal
+    "relato": 0.25,  # indicador extraído da fala (A2)
+    "sofrimento": 0.25,  # voz (A3)
+    "desconforto_facial": 0.20,  # face (V3)
+    "postura": 0.20,  # corpo (V2)
+    "corroboracao": 0.10,  # mesma sessão dentro da janela
 }
 
-GRAVE_TIPOS = frozenset({"agressao", "ameaca"})
+# Sinal normalizado do relato (documentado na spec 002):
+RELATO_SIGNAL: dict[str, float] = {
+    "violencia_domestica": 1.0,
+    "sofrimento_emocional": 0.6,
+    "outro": 0.0,
+}
 
 
 def _clip01(value: float) -> float:
@@ -24,15 +28,15 @@ def _clip01(value: float) -> float:
 
 
 def relato_signal(tipo_relato: str) -> float:
-    """Normalize tipo_relato to [0, 1]: grave types → 1.0, else → 0.0."""
-    return 1.0 if tipo_relato in GRAVE_TIPOS else 0.0
+    """Normalize tipo_relato to [0, 1] per RELATO_SIGNAL (unknown → 0.0)."""
+    return RELATO_SIGNAL.get(tipo_relato, 0.0)
 
 
 def compute_score(
     *,
     tipo_relato: str,
     sofrimento: float,
-    violencia: float,
+    desconforto_facial: float,
     postura_defensiva: float,
     corroborado: bool,
     weights: dict[str, float] | None = None,
@@ -42,7 +46,7 @@ def compute_score(
     signals = {
         "relato": relato_signal(tipo_relato),
         "sofrimento": _clip01(sofrimento),
-        "violencia": _clip01(violencia),
+        "desconforto_facial": _clip01(desconforto_facial),
         "postura": _clip01(postura_defensiva),
         "corroboracao": 1.0 if corroborado else 0.0,
     }
@@ -62,7 +66,7 @@ def score_from_modules(
     return compute_score(
         tipo_relato=str(a12["tipo_relato"]),
         sofrimento=float(a3["sofrimento"]),
-        violencia=float(v3["violencia"]),
+        desconforto_facial=float(v3["desconforto_facial"]),
         postura_defensiva=float(v2["postura_defensiva"]),
         corroborado=corroborado,
         weights=weights,

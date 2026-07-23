@@ -11,14 +11,14 @@ def infer(path: str | Path, transcricao: str | None = None) -> A12Result:
     """Return fixed structured A1/A2 contract. Optional transcricao overrides text."""
     _ = Path(path)
     text = transcricao or (
-        "Preciso de ajuda, tem um homem me agredindo na praça do Cruzeiro."
+        "Tenho medo de voltar para casa, ele fica muito nervoso comigo."
     )
     return validate_a12(
         {
             "transcricao": text,
-            "tipo_relato": "agressao",
-            "local": "Praça do Cruzeiro, Brasília-DF",
-            "tempo": "agora",
+            "tipo_relato": "violencia_domestica",
+            "local": "Consultório 3 — Ambulatório de Ginecologia",
+            "tempo": "durante a consulta",
             "stub": True,
         }
     )

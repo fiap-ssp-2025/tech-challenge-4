@@ -1,4 +1,4 @@
-"""Occurrence note generator (C/D) — support for human dispatch, not a verdict."""
+"""Triage note generator (C/D) — support for the care team, not a verdict."""
 
 from __future__ import annotations
 
@@ -23,9 +23,9 @@ def build_nota_texto(
     corroborado: bool,
 ) -> str:
     lines = [
-        "NOTA DE OCORRÊNCIA (apoio ao despacho 190/193)",
+        "NOTA DE TRIAGEM (apoio à equipe de saúde — consulta)",
         f"Tipo de relato: {a12.get('tipo_relato', 'n/d')}",
-        f"Local (relato): {a12.get('local', 'n/d')}",
+        f"Contexto: {a12.get('local', 'n/d')}",
         f"Tempo (relato): {a12.get('tempo', 'n/d')}",
         f"Transcrição: {a12.get('transcricao', '')}",
         f"Sofrimento (voz): {float(a3.get('sofrimento', 0)):.2f}",
@@ -35,9 +35,9 @@ def build_nota_texto(
     if v2 is not None:
         lines.append(f"Postura defensiva: {float(v2.get('postura_defensiva', 0)):.2f}")
     if v3 is not None:
-        lines.append(f"Violência (cena): {float(v3.get('violencia', 0)):.2f}")
-    lines.append(f"Corroborado (local/tempo): {'sim' if corroborado else 'não'}")
-    lines.append(f"Escore de prioridade: {escore:.3f}")
+        lines.append(f"Desconforto facial: {float(v3.get('desconforto_facial', 0)):.2f}")
+    lines.append(f"Corroborado (mesma sessão): {'sim' if corroborado else 'não'}")
+    lines.append(f"Escore de triagem: {escore:.3f}")
     lines.append(DISCLAIMER)
     return "\n".join(lines)
 
@@ -53,7 +53,7 @@ def build_report(
 ) -> CDResult:
     """Compose C/D contract from module outputs."""
     v2_safe = v2 or {"postura_defensiva": 0.0}
-    v3_safe = v3 or {"violencia": 0.0}
+    v3_safe = v3 or {"desconforto_facial": 0.0}
     escore = score_from_modules(a12, a3, v2_safe, v3_safe, corroborado=corroborado)
     nota = build_nota_texto(
         a12=a12,

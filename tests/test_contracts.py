@@ -17,12 +17,12 @@ def test_a12_ok():
     out = validate_a12(
         {
             "transcricao": "ajuda",
-            "tipo_relato": "ameaca",
+            "tipo_relato": "violencia_domestica",
             "local": "Asa Norte",
             "tempo": "agora",
         }
     )
-    assert out["tipo_relato"] == "ameaca"
+    assert out["tipo_relato"] == "violencia_domestica"
 
 
 def test_a12_rejects_unknown_tipo():
@@ -30,7 +30,7 @@ def test_a12_rejects_unknown_tipo():
         validate_a12(
             {
                 "transcricao": "x",
-                "tipo_relato": "roubo",
+                "tipo_relato": "agressao",
                 "local": "y",
                 "tempo": "z",
             }
@@ -62,7 +62,7 @@ def test_v1_tracks_shape():
 
 def test_v2_v3_cd():
     validate_v2({"postura_defensiva": 0.0})
-    validate_v3({"violencia": 1.0})
+    validate_v3({"desconforto_facial": 1.0})
     validate_cd(
         {
             "escore": 0.4,
