@@ -1,6 +1,8 @@
 # Spec: Despacho Inteligente Áudio–Vídeo (190/193)
 
-> **Status:** in-progress  
+> **Superseded por `specs/002-triagem-consulta/`** — reancoragem ao contexto hospitalar do TC 4 por orientação do professor (23/07/2026). Mantida como registro de decisão.
+
+> **Status:** superseded  
 > **Branch sugerida:** `feat/001-despacho-audio-video`  
 > **Criado em:** 2026-07-23
 
