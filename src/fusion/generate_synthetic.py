@@ -1,4 +1,4 @@
-"""Generate synthetic fusion events for correlation tests (Brasília-DF)."""
+"""Generate synthetic session events for fusion tests (feature 002 — consulta)."""
 
 from __future__ import annotations
 
@@ -6,12 +6,9 @@ import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
-# Pontos plausíveis no DF (WGS84)
-CRUZEIRO = (-15.7942, -47.8822)
-ASA_NORTE = (-15.7640, -47.8825)
-TAGUATINGA = (-15.8339, -48.0567)
-
-OUT_PATH = Path(__file__).resolve().parents[2] / "data" / "fusion_synthetic" / "events.jsonl"
+OUT_PATH = (
+    Path(__file__).resolve().parents[2] / "data" / "fusion_synthetic" / "events.jsonl"
+)
 
 
 def _iso(dt: datetime) -> str:
@@ -19,117 +16,57 @@ def _iso(dt: datetime) -> str:
 
 
 def build_events(base: datetime | None = None) -> list[dict]:
-    """6 paired + 2 audio-only + 2 video-only + 2 time-divergent (>10 min)."""
-    t0 = base or datetime(2026, 7, 23, 18, 0, 0, tzinfo=timezone.utc)
+    """6 paired sessions + 2 audio-only + 2 video-only + 2 time-divergent (>10 min)."""
+    t0 = base or datetime(2026, 7, 23, 9, 0, 0, tzinfo=timezone.utc)
     events: list[dict] = []
 
-    # --- 6 pairs (same lat/lon/timestamp) ---
-    pair_points = [
-        (CRUZEIRO, "pair-01"),
-        (CRUZEIRO, "pair-02"),
-        (ASA_NORTE, "pair-03"),
-        (ASA_NORTE, "pair-04"),
-        (TAGUATINGA, "pair-05"),
-        (TAGUATINGA, "pair-06"),
-    ]
-    for i, ((lat, lon), pid) in enumerate(pair_points):
-        # 30 min between pairs at the same coords so they do not cross-match (±10 min).
-        ts = _iso(t0 + timedelta(minutes=i * 30))
-        events.append(
-            {
-                "id": f"{pid}-audio",
-                "modality": "audio",
-                "group": "pair",
-                "pair_id": pid,
-                "lat": lat,
-                "lon": lon,
-                "timestamp": ts,
-            }
-        )
-        events.append(
-            {
-                "id": f"{pid}-video",
-                "modality": "video",
-                "group": "pair",
-                "pair_id": pid,
-                "lat": lat,
-                "lon": lon,
-                "timestamp": ts,
-            }
-        )
+    def add(eid, modality, group, session_id, ts, pair_id=None):
+        ev = {
+            "id": eid,
+            "modality": modality,
+            "group": group,
+            "session_id": session_id,
+            "timestamp": _iso(ts),
+        }
+        if pair_id:
+            ev["pair_id"] = pair_id
+        events.append(ev)
 
-    # --- 2 audio-only controls ---
-    for i, (lat, lon) in enumerate([CRUZEIRO, ASA_NORTE]):
-        events.append(
-            {
-                "id": f"audio-only-{i+1}",
-                "modality": "audio",
-                "group": "audio_only",
-                "lat": lat + 0.05,  # far from pair clusters used below
-                "lon": lon + 0.05,
-                "timestamp": _iso(t0 + timedelta(hours=2, minutes=i)),
-            }
-        )
+    # 6 paired consultations: audio and video of the SAME session, 2 min apart.
+    for i in range(1, 7):
+        sid = f"consulta-{i:02d}"
+        ts = t0 + timedelta(minutes=(i - 1) * 40)
+        add(f"{sid}-audio", "audio", "pair", sid, ts, pair_id=sid)
+        add(f"{sid}-video", "video", "pair", sid, ts + timedelta(minutes=2), pair_id=sid)
 
-    # --- 2 video-only controls ---
-    for i, (lat, lon) in enumerate([TAGUATINGA, CRUZEIRO]):
-        events.append(
-            {
-                "id": f"video-only-{i+1}",
-                "modality": "video",
-                "group": "video_only",
-                "lat": lat - 0.06,
-                "lon": lon - 0.06,
-                "timestamp": _iso(t0 + timedelta(hours=3, minutes=i)),
-            }
-        )
+    # 2 audio-only (sessão sem vídeo)
+    for i in range(1, 3):
+        sid = f"consulta-a{i:02d}"
+        add(f"{sid}-audio", "audio", "audio_only", sid, t0 + timedelta(hours=5, minutes=i * 15))
 
-    # --- 2 divergent-time controls (same place, >10 min apart) ---
-    for i, ((lat, lon), label) in enumerate(
-        [(CRUZEIRO, "div-01"), (ASA_NORTE, "div-02")]
-    ):
-        events.append(
-            {
-                "id": f"{label}-audio",
-                "modality": "audio",
-                "group": "time_divergent",
-                "pair_id": label,
-                "lat": lat,
-                "lon": lon,
-                "timestamp": _iso(t0 + timedelta(hours=4, minutes=i * 5)),
-            }
-        )
-        events.append(
-            {
-                "id": f"{label}-video",
-                "modality": "video",
-                "group": "time_divergent",
-                "pair_id": label,
-                "lat": lat,
-                "lon": lon,
-                "timestamp": _iso(
-                    t0 + timedelta(hours=4, minutes=i * 5 + 15)
-                ),  # +15 min > 10
-            }
-        )
+    # 2 video-only
+    for i in range(1, 3):
+        sid = f"consulta-v{i:02d}"
+        add(f"{sid}-video", "video", "video_only", sid, t0 + timedelta(hours=6, minutes=i * 15))
+
+    # 2 time-divergent: mesma sessão, vídeo 30 min depois (> janela de 10 min)
+    for i in range(1, 3):
+        sid = f"consulta-d{i:02d}"
+        ts = t0 + timedelta(hours=7, minutes=i * 60)
+        add(f"{sid}-audio", "audio", "time_divergent", sid, ts)
+        add(f"{sid}-video", "video", "time_divergent", sid, ts + timedelta(minutes=30))
 
     return events
 
 
-def write_events(path: Path = OUT_PATH) -> Path:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    events = build_events()
-    with path.open("w", encoding="utf-8") as fh:
-        for ev in events:
+def write_events(path: Path | None = None) -> Path:
+    out = path or OUT_PATH
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w", encoding="utf-8") as fh:
+        for ev in build_events():
             fh.write(json.dumps(ev, ensure_ascii=False) + "\n")
-    return path
-
-
-def load_events(path: Path = OUT_PATH) -> list[dict]:
-    with path.open(encoding="utf-8") as fh:
-        return [json.loads(line) for line in fh if line.strip()]
+    return out
 
 
 if __name__ == "__main__":
-    out = write_events()
-    print(f"Wrote {out}")
+    print(write_events())

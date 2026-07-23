@@ -1,12 +1,12 @@
-"""JSON contracts for audio/video/fusion inference modules (immutable from Etapa 2)."""
+"""JSON contracts (feature 002 — triagem em consulta; immutable from Etapa 2)."""
 
 from __future__ import annotations
 
 from typing import Any, Literal, TypedDict
 
-TipoRelato = Literal["agressao", "ameaca", "perseguicao", "outro"]
+TipoRelato = Literal["violencia_domestica", "sofrimento_emocional", "outro"]
 TIPO_RELATO_VALUES: frozenset[str] = frozenset(
-    {"agressao", "ameaca", "perseguicao", "outro"}
+    {"violencia_domestica", "sofrimento_emocional", "outro"}
 )
 
 
@@ -41,7 +41,7 @@ class V2Result(TypedDict, total=False):
 
 
 class V3Result(TypedDict, total=False):
-    violencia: float
+    desconforto_facial: float
     stub: bool
 
 
@@ -127,8 +127,8 @@ def validate_v2(data: dict[str, Any]) -> V2Result:
 
 
 def validate_v3(data: dict[str, Any]) -> V3Result:
-    _require_keys(data, ("violencia",), "V3")
-    _unit_interval(data["violencia"], "violencia", "V3")
+    _require_keys(data, ("desconforto_facial",), "V3")
+    _unit_interval(data["desconforto_facial"], "desconforto_facial", "V3")
     return data  # type: ignore[return-value]
 
 

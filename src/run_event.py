@@ -1,4 +1,4 @@
-"""End-to-end event runner: .wav + .mp4 → prioritized occurrence note (stubs in Etapa 1)."""
+"""End-to-end session runner: consulta .wav + .mp4 → triage note (feature 002)."""
 
 from __future__ import annotations
 
@@ -10,11 +10,10 @@ from pathlib import Path
 
 from src.fusion.correlate import within_correlation
 from src.fusion.report import build_report
-from src.stubs import a1_stt, a2_nlp, a3_emotion, v1_tracks, v2_pose, v3_violence
+from src.stubs import a1_stt, a2_nlp, a3_emotion, v1_tracks, v2_pose, v3_face
 
-# Default demo geolocation (Praça do Cruzeiro, DF) — elo simulado áudio↔vídeo.
-DEFAULT_LAT = -15.7942
-DEFAULT_LON = -47.8822
+# Default demo session — áudio e vídeo da MESMA consulta.
+DEFAULT_SESSION_ID = "consulta-demo"
 
 
 def _now_iso() -> str:
@@ -25,12 +24,11 @@ def run_pipeline(
     audio_path: Path,
     video_path: Path,
     *,
-    lat: float = DEFAULT_LAT,
-    lon: float = DEFAULT_LON,
+    session_id: str = DEFAULT_SESSION_ID,
     audio_ts: str | None = None,
     video_ts: str | None = None,
 ) -> dict:
-    """A1→A2→A3→alert→correlation→V1/V2/V3→score→note."""
+    """A1→A2→A3→alert→session correlation→V1/V2/V3→score→triage note."""
     audio_path = Path(audio_path)
     video_path = Path(video_path)
     if not audio_path.is_file():
@@ -56,35 +54,33 @@ def run_pipeline(
     a3 = a3_emotion.infer(audio_path)
     print(f"[A3] sofrimento={a3['sofrimento']:.2f}")
 
-    print("[alerta] Ligação priorizada — solicitando vídeo da região (sob demanda).")
+    print("[alerta] Sinais na fala — analisando o vídeo da mesma consulta.")
 
     ts_audio = audio_ts or _now_iso()
     ts_video = video_ts or ts_audio
     audio_event = {
         "id": "live-audio",
         "modality": "audio",
-        "lat": lat,
-        "lon": lon,
+        "session_id": session_id,
         "timestamp": ts_audio,
     }
     video_event = {
         "id": "live-video",
         "modality": "video",
-        "lat": lat,
-        "lon": lon,
+        "session_id": session_id,
         "timestamp": ts_video,
     }
     corroborado = within_correlation(audio_event, video_event)
-    print(f"[C] correlação local/tempo → corroborado={corroborado}")
+    print(f"[C] correlação por sessão → corroborado={corroborado}")
 
-    # --- Vídeo (corroboração sob demanda) ---
+    # --- Vídeo (mesma consulta) ---
     v1 = v1_tracks.infer(video_path)
     v2 = v2_pose.infer(video_path)
-    v3 = v3_violence.infer(video_path)
+    v3 = v3_face.infer(video_path)
     print(
         f"[V1] n_pessoas={v1['n_pessoas']} | "
         f"[V2] postura={v2['postura_defensiva']:.2f} | "
-        f"[V3] violencia={v3['violencia']:.2f}"
+        f"[V3] desconforto_facial={v3['desconforto_facial']:.2f}"
     )
 
     cd = build_report(
@@ -130,12 +126,11 @@ def make_dummy_media(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Pipeline despacho áudio–vídeo (stubs na Etapa 1)"
+        description="Pipeline de triagem em consulta (feature 002)"
     )
     parser.add_argument("--audio", type=Path, required=True, help="caminho .wav")
     parser.add_argument("--video", type=Path, required=True, help="caminho .mp4")
-    parser.add_argument("--lat", type=float, default=DEFAULT_LAT)
-    parser.add_argument("--lon", type=float, default=DEFAULT_LON)
+    parser.add_argument("--session", type=str, default=DEFAULT_SESSION_ID)
     parser.add_argument(
         "--make-dummies",
         action="store_true",
@@ -154,7 +149,7 @@ def main(argv: list[str] | None = None) -> int:
             print("use --make-dummies com dummy.wav/dummy.mp4", file=sys.stderr)
             return 1
 
-    result = run_pipeline(args.audio, args.video, lat=args.lat, lon=args.lon)
+    result = run_pipeline(args.audio, args.video, session_id=args.session)
     print()
     print(result["cd"]["nota_ocorrencia"])
     if args.json:

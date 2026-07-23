@@ -31,11 +31,11 @@ def infer(path: str | Path) -> A12Result:
     return validate_a12(
         {
             "transcricao": (
-                "Preciso de ajuda, tem um homem me agredindo na praça do Cruzeiro."
+                "Tenho medo de voltar para casa, ele fica muito nervoso comigo."
             ),
-            "tipo_relato": "agressao",
-            "local": "Praça do Cruzeiro, Brasília-DF",
-            "tempo": "agora",
+            "tipo_relato": "violencia_domestica",
+            "local": "Consultório 3 — Ambulatório de Ginecologia",
+            "tempo": "durante a consulta",
             "stub": True,
         }
     )
