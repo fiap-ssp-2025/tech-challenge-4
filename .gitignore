@@ -216,3 +216,10 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Project — despacho áudio/vídeo
+data/**/raw/**
+!data/**/raw/.gitkeep
+runs/
+dummy.wav
+dummy.mp4
