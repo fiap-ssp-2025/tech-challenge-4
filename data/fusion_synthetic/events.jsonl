@@ -1,0 +1,20 @@
+{"id": "pair-01-audio", "modality": "audio", "group": "pair", "pair_id": "pair-01", "lat": -15.7942, "lon": -47.8822, "timestamp": "2026-07-23T18:00:00Z"}
+{"id": "pair-01-video", "modality": "video", "group": "pair", "pair_id": "pair-01", "lat": -15.7942, "lon": -47.8822, "timestamp": "2026-07-23T18:00:00Z"}
+{"id": "pair-02-audio", "modality": "audio", "group": "pair", "pair_id": "pair-02", "lat": -15.7942, "lon": -47.8822, "timestamp": "2026-07-23T18:30:00Z"}
+{"id": "pair-02-video", "modality": "video", "group": "pair", "pair_id": "pair-02", "lat": -15.7942, "lon": -47.8822, "timestamp": "2026-07-23T18:30:00Z"}
+{"id": "pair-03-audio", "modality": "audio", "group": "pair", "pair_id": "pair-03", "lat": -15.764, "lon": -47.8825, "timestamp": "2026-07-23T19:00:00Z"}
+{"id": "pair-03-video", "modality": "video", "group": "pair", "pair_id": "pair-03", "lat": -15.764, "lon": -47.8825, "timestamp": "2026-07-23T19:00:00Z"}
+{"id": "pair-04-audio", "modality": "audio", "group": "pair", "pair_id": "pair-04", "lat": -15.764, "lon": -47.8825, "timestamp": "2026-07-23T19:30:00Z"}
+{"id": "pair-04-video", "modality": "video", "group": "pair", "pair_id": "pair-04", "lat": -15.764, "lon": -47.8825, "timestamp": "2026-07-23T19:30:00Z"}
+{"id": "pair-05-audio", "modality": "audio", "group": "pair", "pair_id": "pair-05", "lat": -15.8339, "lon": -48.0567, "timestamp": "2026-07-23T20:00:00Z"}
+{"id": "pair-05-video", "modality": "video", "group": "pair", "pair_id": "pair-05", "lat": -15.8339, "lon": -48.0567, "timestamp": "2026-07-23T20:00:00Z"}
+{"id": "pair-06-audio", "modality": "audio", "group": "pair", "pair_id": "pair-06", "lat": -15.8339, "lon": -48.0567, "timestamp": "2026-07-23T20:30:00Z"}
+{"id": "pair-06-video", "modality": "video", "group": "pair", "pair_id": "pair-06", "lat": -15.8339, "lon": -48.0567, "timestamp": "2026-07-23T20:30:00Z"}
+{"id": "audio-only-1", "modality": "audio", "group": "audio_only", "lat": -15.7442, "lon": -47.8322, "timestamp": "2026-07-23T20:00:00Z"}
+{"id": "audio-only-2", "modality": "audio", "group": "audio_only", "lat": -15.713999999999999, "lon": -47.8325, "timestamp": "2026-07-23T20:01:00Z"}
+{"id": "video-only-1", "modality": "video", "group": "video_only", "lat": -15.8939, "lon": -48.1167, "timestamp": "2026-07-23T21:00:00Z"}
+{"id": "video-only-2", "modality": "video", "group": "video_only", "lat": -15.8542, "lon": -47.9422, "timestamp": "2026-07-23T21:01:00Z"}
+{"id": "div-01-audio", "modality": "audio", "group": "time_divergent", "pair_id": "div-01", "lat": -15.7942, "lon": -47.8822, "timestamp": "2026-07-23T22:00:00Z"}
+{"id": "div-01-video", "modality": "video", "group": "time_divergent", "pair_id": "div-01", "lat": -15.7942, "lon": -47.8822, "timestamp": "2026-07-23T22:15:00Z"}
+{"id": "div-02-audio", "modality": "audio", "group": "time_divergent", "pair_id": "div-02", "lat": -15.764, "lon": -47.8825, "timestamp": "2026-07-23T22:05:00Z"}
+{"id": "div-02-video", "modality": "video", "group": "time_divergent", "pair_id": "div-02", "lat": -15.764, "lon": -47.8825, "timestamp": "2026-07-23T22:20:00Z"}
