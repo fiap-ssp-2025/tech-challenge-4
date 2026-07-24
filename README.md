@@ -13,19 +13,46 @@ uv sync
 cp .env.example .env   # preencha AZURE_SPEECH_KEY / AZURE_SPEECH_REGION (P3)
 ```
 
-## Pipeline ponta a ponta (Etapa 1 — stubs)
+## Pipeline ponta a ponta
 
 ```bash
-uv run python -m src.run_event --audio dummy.wav --video dummy.mp4
+uv run python -m src.run_event --audio dummy.wav --video dummy.mp4 --make-dummies
 ```
 
 Se `dummy.wav` / `dummy.mp4` não existirem, o runner gera silêncio + frame preto (~2 s).
+No início da execução ele imprime o mapa `[resolve]` (qual módulo rodou real e qual rodou stub,
+com o motivo) e, ao final, o tempo de inferência de cada módulo em ms.
 
 Testes:
 
 ```bash
 uv run pytest
 ```
+
+### Módulos reais vs stubs (`src/resolve.py`)
+
+Nenhum caminho do pipeline importa `src.stubs.*` direto: `get_module(name)` tenta o módulo real
+(`src/audio|video/<nome>/infer.py`) e cai para o stub — **sempre com log do motivo** — quando falta
+pacote, artefato treinado, credencial, ou quando o `infer.py` real ainda é só um re-export do stub.
+
+| Variável | Efeito |
+|---|---|
+| `TC4_FORCE_STUBS=1` | força 100% stub (demo controlada, reprodutível) |
+| `TC4_REQUIRE_REAL=v1_tracks,v2_pose` | erro se algum listado cair para stub (CI futura) |
+
+### Modelos treinados (`models/`)
+
+`models/v2_posture_head.pkl` (~700 KB, cabeça de postura do V2) **é versionado** para o V2 real
+funcionar num clone limpo; `models/v2_posture_metrics.json` guarda o F1 do treino. Demais pesos
+(`*.pt`, `*.bin`, checkpoints) continuam fora do git. Reprodutibilidade — o `.pkl` sai de:
+
+```bash
+uv run python scripts/extract_pose_frames.py --raw-dir data/video_consulta/raw/ravdess  # atores 01–08
+uv run python scripts/train_v2_posture.py    # seed 42, split por ator → F1 macro 0,6868
+```
+
+Os pesos YOLO (`yolov8n.pt`, `yolov8n-pose.pt`) são baixados pela ultralytics no primeiro uso.
+Sem eles (ou sem o `.pkl`), os testes de V1/V2 reais são pulados e o pipeline usa os stubs.
 
 Eventos sintéticos de fusão:
 
@@ -38,11 +65,11 @@ uv run python -m src.fusion.generate_synthetic
 
 | Papel | Módulo real | Stub atual |
 |-------|-------------|------------|
-| **P2** | `src/audio/a3_emotion/` | `src/stubs/a3_emotion.py` |
-| **P3** | `src/audio/a1_stt/`, `src/audio/a2_nlp/` | `src/stubs/a1_stt.py`, `src/stubs/a2_nlp.py` |
-| **P4** | `src/video/v3_violence/` | `src/stubs/v3_violence.py` |
-| **P5** | `src/video/v1_tracks/`, `src/video/v2_pose/` | `src/stubs/v1_tracks.py`, `src/stubs/v2_pose.py` |
-| **P1** | `src/fusion/` (já real), `src/run_event.py`, contratos | — |
+| **P2** | `src/audio/a3_emotion/` (T110) | `src/stubs/a3_emotion.py` |
+| **P3** | `src/audio/a1_stt/`, `src/audio/a2_nlp/` (T103/T111) | `src/stubs/a1_stt.py`, `src/stubs/a2_nlp.py` |
+| **P4** | `src/video/v3_face/` (T112) | `src/stubs/v3_face.py` |
+| **P5** | `src/video/v1_tracks/`, `src/video/v2_pose/` — **reais** | — |
+| **P1** | `src/fusion/` (já real), `src/resolve.py`, `src/run_event.py`, contratos | — |
 
 Contratos JSON em `src/contracts/` — **imutáveis a partir da Etapa 2**.
 
@@ -52,13 +79,15 @@ Contratos JSON em `src/contracts/` — **imutáveis a partir da Etapa 2**.
 src/
   contracts/     # A1/A2, A3, V1, V2, V3, C/D
   audio/         # a1_stt, a2_nlp, a3_emotion
-  video/         # v1_tracks, v2_pose, v3_violence
+  video/         # v1_tracks, v2_pose, v3_face
   fusion/        # correlate, scoring, report
   stubs/         # infer() fixos até modelos reais
+  resolve.py     # escolhe real vs stub por módulo (com log)
   run_event.py
+models/          # v2_posture_head.pkl (versionado); demais pesos fora do git
 data/
-  audio_ptbr/ video_violence/ pose_posture/ fusion_synthetic/
-specs/001-despacho-audio-video/
+  audio_ptbr/ video_consulta/ pose_posture/ fusion_synthetic/
+specs/002-triagem-consulta/
 ```
 
 ## Spec-Driven Development
