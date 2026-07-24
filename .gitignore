@@ -225,6 +225,7 @@ data/**/processed/**
 data/**/annotations/**
 !data/**/annotations/.gitkeep
 runs/
+Ultralytics/
 dummy.wav
 dummy.mp4
 

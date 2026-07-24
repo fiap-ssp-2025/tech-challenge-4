@@ -68,6 +68,15 @@ Eventos → {session_id, modality, timestamp}
 - VERBO: solicitação manual — texto em `docs/verbo-solicitacao.md` (não automatizar).
 - Verificação: `scripts/verify_audio_dataset.py`.
 
+### Vídeo — face (T104) — detalhes operacionais
+
+- Fontes: RAVDESS speech video ([Zenodo 1188976](https://zenodo.org/record/1188976), `Video_Speech_Actor_01..24.zip`) + CREMA-D `VideoFlash` ([CheyneyComputerScience/CREMA-D](https://github.com/CheyneyComputerScience/CREMA-D), Git LFS).
+- Scripts: `download_ravdess.py` → `data/video_consulta/raw/ravdess/`; `download_cremad.py` → `data/video_consulta/raw/cremad/` (sparse checkout); `extract_face_frames.py` → `data/video_consulta/processed/faces/` + `labels.csv`; `verify_face_dataset.py`.
+- CREMA-D (decisão de peso): por padrão baixa LFS **somente** emoções `NEU|FEA|SAD` de atrizes (`--all-actors` para incluir homens). VideoFlash completo ~2 GB; o subconjunto cabe em centenas de MB.
+- Rótulos pelo nome do arquivo (sem anotação manual). Binário V3: `desconforto` ← `{fearful,sad}`; `neutro` ← `{neutral,calm}` (`calm` entra em neutro para manter classe minoritária ≥ 40% no RAVDESS).
+- Split **por ator** (ids `ravdess_XX` / `crema_YYYY`); estratificação com atrizes primeiro. Notebook esqueleto: `notebooks/t112_fer_colab.ipynb` (treino = T112).
+- Detector default: YOLOv8n (pessoa) + recorte superior; alternativa `--detector haar`.
+
 ## Riscos (delta)
 
 | Risco | Resposta |
