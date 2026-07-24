@@ -8,9 +8,10 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from src.audio.a1_stt.infer import infer as infer_a1_stt
 from src.fusion.correlate import within_correlation
 from src.fusion.report import build_report
-from src.stubs import a1_stt, a2_nlp, a3_emotion, v1_tracks, v2_pose, v3_face
+from src.stubs import a2_nlp, a3_emotion, v1_tracks, v2_pose, v3_face
 
 # Default demo session — áudio e vídeo da MESMA consulta.
 DEFAULT_SESSION_ID = "consulta-demo"
@@ -38,15 +39,15 @@ def run_pipeline(
 
     # --- Áudio (gatilho) ---
     transcricao: str | None = None
+
     try:
-        a1 = a1_stt.infer(audio_path)
+        a1 = infer_a1_stt(audio_path)
         transcricao = a1["transcricao"]
-        print("[A1] STT stub OK (credenciais Azure presentes; API não chamada).")
+        provedor = a1.get("provedor", "não informado")
+        print(f"[A1] Transcrição concluída com {provedor}.")
     except RuntimeError as exc:
-        print(f"[A1] {exc}")
-        print(
-            "[A1] Continuando com stub A2 até P3 entregar Azure real / faster-whisper."
-        )
+        print(f"[A1] Falha na transcrição: {exc}")
+        print("[A1] Continuando o pipeline sem transcrição.")
 
     a12 = a2_nlp.infer(audio_path, transcricao=transcricao)
     print(f"[A2] tipo_relato={a12['tipo_relato']} local={a12['local']}")
