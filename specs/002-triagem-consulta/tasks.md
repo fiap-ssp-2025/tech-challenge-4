@@ -5,7 +5,8 @@
 ## Etapa 1 — Realinhamento (este PR) + dados
 - [x] T101 P1: specs 002; contratos v2 (taxonomia, V3 facial, sessão); renomear módulos/stubs/pastas; fusão por sessão; sintéticos por sessão; runner e testes atualizados
   - **Verificado:** `pytest` verde; E2E com stubs roda com `session_id`
-- [ ] T102 P2: CORAA 8 kHz + labels + split por locutor (igual T002/001); solicitar VERBO
+- [x] T102 P2: CORAA 8 kHz + labels + split por locutor (igual T002/001); solicitar VERBO
+  - **Verificado:** `labels.csv` 933 linhas = 933 wavs em `processed/`; `verify_audio_dataset.py` prova zero locutor cruzando splits + amostra 5× 8 kHz mono; `pytest` verde; e-mail VERBO em `docs/verbo-solicitacao.md` (envio manual)
 - [ ] T103 P3: Azure Speech F0 + fallback (igual T003/001); PLN com nova taxonomia
 - [ ] T104 P4: extrair frames faciais RAVDESS/CREMA-D (rosto via YOLOv8); labels de emoção pelo nome do arquivo; split por ator; notebook Colab
 - [ ] T105 P5: frames de corpo + CVAT (`defensiva`/`neutra`); sprint coletivo de anotação (~1h, todos)
