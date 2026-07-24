@@ -12,7 +12,8 @@ from src.contracts import V2Result, validate_v2
 _pose_model = None
 _clf = None
 
-MODEL_PATH = Path(__file__).resolve().parents[4] / "models" / "v2_posture_head.pkl"
+# parents[3] = repo root (src/video/v2_pose/infer.py → src/video → src → root)
+MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "v2_posture_head.pkl"
 
 # COCO indices
 _NOSE = 0
