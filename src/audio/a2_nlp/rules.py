@@ -1,0 +1,98 @@
+"""Rule definitions for A2 NLP classification and extraction."""
+
+from __future__ import annotations
+
+VIOLENCE_TERMS: tuple[str, ...] = (
+    "agrediu",
+    "agressão",
+    "agressao",
+    "ameaça",
+    "ameaca",
+    "ameaçou",
+    "ameacou",
+    "apanhei",
+    "bate",
+    "bateu",
+    "bater",
+    "empurrou",
+    "estrangulou",
+    "machucou",
+    "me agride",
+    "me agrediu",
+    "me bate",
+    "me bateu",
+    "me ameaça",
+    "me ameaca",
+    "me ameaçou",
+    "me ameacou",
+    "me empurra",
+    "me empurrou",
+    "me machuca",
+    "me machucou",
+    "violência doméstica",
+    "violencia domestica",
+)
+
+EMOTIONAL_DISTRESS_TERMS: tuple[str, ...] = (
+    "angústia",
+    "angustia",
+    "angustiada",
+    "angustiado",
+    "ansiedade",
+    "ansiosa",
+    "ansioso",
+    "chorando",
+    "depressão",
+    "depressao",
+    "deprimida",
+    "deprimido",
+    "desesperada",
+    "desesperado",
+    "não aguento mais",
+    "nao aguento mais",
+    "pânico",
+    "panico",
+    "sem esperança",
+    "sofrimento",
+    "triste",
+    "tristeza",
+)
+
+NEGATION_TERMS: tuple[str, ...] = (
+    "não",
+    "nao",
+    "nunca",
+    "jamais",
+)
+
+LOCAL_PATTERNS: tuple[str, ...] = (
+    r"\bconsult[oó]rio(?:\s+\d+)?\b",
+    r"\bambulat[oó]rio(?:\s+de\s+[\wÀ-ÿ\s]+)?\b",
+    r"\bhospital(?:\s+[\wÀ-ÿ\s]+)?\b",
+    r"\bubs(?:\s+[\wÀ-ÿ\s]+)?\b",
+    r"\bposto de sa[uú]de(?:\s+[\wÀ-ÿ\s]+)?\b",
+    r"\bcl[ií]nica(?:\s+[\wÀ-ÿ\s]+)?\b",
+    r"\bem casa\b",
+    r"\bna minha casa\b",
+    r"\bno trabalho\b",
+    r"\bna escola\b",
+)
+
+TIME_PATTERNS: tuple[str, ...] = (
+    r"\bhoje\b",
+    r"\bontem\b",
+    r"\banteontem\b",
+    r"\bagora\b",
+    r"\bnesta manh[ãa]\b",
+    r"\bessa manh[ãa]\b",
+    r"\besta tarde\b",
+    r"\bessa tarde\b",
+    r"\besta noite\b",
+    r"\bessa noite\b",
+    r"\bsemana passada\b",
+    r"\bm[eê]s passado\b",
+    r"\bh[aá]\s+\d+\s+dias?\b",
+    r"\bh[aá]\s+\d+\s+semanas?\b",
+    r"\bh[aá]\s+\d+\s+meses?\b",
+    r"\bdurante a consulta\b",
+)
