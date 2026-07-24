@@ -6,8 +6,9 @@
 
 ## Etapa 1 — Fundações e dados
 
-- [ ] T001 P1: repo + `uv` + `.env` Azure + esqueleto `src/` + contratos JSON + stubs de todos os módulos + `events.jsonl` sintético
+- [x] T001 P1: repo + `uv` + `.env` Azure + esqueleto `src/` + contratos JSON + stubs de todos os módulos + `events.jsonl` sintético
   - **Verificar:** pipeline ponta a ponta roda só com stubs
+  - **Feito em:** 2026-07-23 — `uv sync && uv run pytest && uv run python -m src.run_event --audio dummy.wav --video dummy.mp4`
 - [ ] T002 P2: baixar CORAA SER; enviar solicitação VERBO (início da etapa); reamostrar 8 kHz; `labels.csv`; split por locutor
   - **Verificar:** dataset de treino A3 utilizável localmente
 - [ ] T003 P3: recurso Azure Speech (F0); STT PT-BR em 3 áudios de teste; instalar faster-whisper

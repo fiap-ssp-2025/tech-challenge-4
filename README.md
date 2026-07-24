@@ -1,98 +1,72 @@
-# Tech Challenge 4 — Spec-Driven Development
+# Tech Challenge 4 — Despacho Inteligente Áudio–Vídeo (190/193)
 
-Repositório base para desenvolver **em sincronia com IAs** usando Spec-Driven Development (SDD): a especificação versionada é a fonte da verdade; o código deriva dela.
+Pipeline de apoio ao despacho: a **ligação 190/193** dispara STT + PLN + emoção de voz; o **vídeo da região** (sob demanda) corrobora com tracks, postura e violência. A fusão (local/tempo + escore) gera uma nota priorizada — **decisão final humana**.
 
-Funciona com Cursor, Claude Code, Copilot, Codex e qualquer agente que leia `AGENTS.md`.
+Fonte da verdade: `AGENTS.md` + `specs/001-despacho-audio-video/`.
 
-## Por que SDD aqui?
+## Instalação (reproduzível)
 
-Sem spec compartilhada, cada pessoa (e cada IA) “inventa” requisitos no chat. Com SDD:
+Requer [uv](https://docs.astral.sh/uv/) e Python 3.11+.
 
-1. O time alinha o **quê** em `specs/`
-2. Escolhe o **como** no `plan.md`
-3. Decompõe em `tasks.md`
-4. Só então implementa — e qualquer agente retoma do mesmo lugar
+```bash
+uv sync
+cp .env.example .env   # preencha AZURE_SPEECH_KEY / AZURE_SPEECH_REGION (P3)
+```
+
+## Pipeline ponta a ponta (Etapa 1 — stubs)
+
+```bash
+uv run python -m src.run_event --audio dummy.wav --video dummy.mp4
+```
+
+Se `dummy.wav` / `dummy.mp4` não existirem, o runner gera silêncio + frame preto (~2 s).
+
+Testes:
+
+```bash
+uv run pytest
+```
+
+Eventos sintéticos de fusão:
+
+```bash
+uv run python -m src.fusion.generate_synthetic
+# → data/fusion_synthetic/events.jsonl
+```
+
+## Quem substitui qual stub
+
+| Papel | Módulo real | Stub atual |
+|-------|-------------|------------|
+| **P2** | `src/audio/a3_emotion/` | `src/stubs/a3_emotion.py` |
+| **P3** | `src/audio/a1_stt/`, `src/audio/a2_nlp/` | `src/stubs/a1_stt.py`, `src/stubs/a2_nlp.py` |
+| **P4** | `src/video/v3_violence/` | `src/stubs/v3_violence.py` |
+| **P5** | `src/video/v1_tracks/`, `src/video/v2_pose/` | `src/stubs/v1_tracks.py`, `src/stubs/v2_pose.py` |
+| **P1** | `src/fusion/` (já real), `src/run_event.py`, contratos | — |
+
+Contratos JSON em `src/contracts/` — **imutáveis a partir da Etapa 2**.
 
 ## Estrutura
 
 ```text
-AGENTS.md                 ← instruções para qualquer IA
-.specify/
-  memory/constitution.md  ← princípios permanentes
-  templates/              ← modelos de spec / plan / tasks
-.cursor/
-  rules/sdd.mdc           ← regra sempre ativa (Cursor)
-  commands/               ← /specify /clarify /plan /tasks /implement
-specs/
-  000-hello-sdd/          ← exemplo completo (done)
-  NNN-slug/               ← próximas features
-src/hello_sdd/            ← código do exemplo
-tests/                    ← testes do exemplo
+src/
+  contracts/     # A1/A2, A3, V1, V2, V3, C/D
+  audio/         # a1_stt, a2_nlp, a3_emotion
+  video/         # v1_tracks, v2_pose, v3_violence
+  fusion/        # correlate, scoring, report
+  stubs/         # infer() fixos até modelos reais
+  run_event.py
+data/
+  audio_ptbr/ video_violence/ pose_posture/ fusion_synthetic/
+specs/001-despacho-audio-video/
 ```
 
-## Fluxo de trabalho
+## Spec-Driven Development
 
-```text
-constitution → specify → clarify → plan → tasks → implement
-```
+Fluxo: `constitution → specify → clarify → plan → tasks → implement`.
 
-| Fase | Comando (Cursor) | Artefato |
-|------|------------------|----------|
-| Spec | `/specify` | `specs/NNN-slug/spec.md` |
-| Clareza | `/clarify` | atualiza a spec |
-| Plano | `/plan` | `plan.md` |
-| Tasks | `/tasks` | `tasks.md` |
-| Código | `/implement` | `src/`, `tests/` + checkboxes |
-
-Em outras IAs: peça a mesma fase (“crie a spec seguindo `AGENTS.md` e o template”).
-
-### Nova feature (checklist)
-
-1. Abra o agente na raiz do repo
-2. Rode `/specify Descreva a feature...` (ou peça o equivalente)
-3. Feche ambiguidades com `/clarify`
-4. `/plan` com restrições de stack (se houver)
-5. `/tasks` → revise a lista
-6. `/implement` task a task
-7. Commit quando o time validar (humano pede o commit)
-
-Numeração: próximo `NNN` livre em `specs/` (ex.: `001-minha-feature`).
-
-## Exemplo funcional
-
-O pacote `hello_sdd` implementa `specs/000-hello-sdd/`.
+Feature ativa: **001-despacho-audio-video** (`in-progress`). O exemplo `hello_sdd` / `specs/000-hello-sdd` permanece até a Etapa 5.
 
 ```bash
-# Python 3.11+
-python -m venv .venv
-source .venv/bin/activate   # Windows: .venv\Scripts\activate
-
-pip install -e ".[dev]"
-
-python -m hello_sdd Ada
-# Hello, Ada!
-
-pytest
+uv run hello-sdd Ada   # exemplo legado
 ```
-
-## Sincronia entre pessoas e IAs
-
-| Situação | O que fazer |
-|----------|-------------|
-| Retomar trabalho | Ler `AGENTS.md` → feature ativa em `specs/` → próxima task aberta |
-| Mudou o requisito | Atualizar `spec.md` (e plan/tasks) **antes** do código |
-| Outra IA / outra pessoa | Mesmos artefatos no git — o chat não é a verdade |
-| Feature concluída | Status `done` na spec/plan; tasks todas `[x]` |
-
-## Convenções rápidas
-
-- Specs e docs do time: **português**
-- Código e IDs (`US-1`, `T010`): **inglês** / estáveis
-- `spec.md` sem stack; `plan.md` com stack
-- Constituição: decisões duráveis; features: pastas em `specs/`
-
-## Próximos passos
-
-1. Ajuste `.specify/memory/constitution.md` ao domínio real do challenge
-2. Crie `specs/001-...` com a primeira feature de negócio
-3. Mantenha `AGENTS.md` curto — detalhes vão para constituição e specs

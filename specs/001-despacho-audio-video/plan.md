@@ -1,7 +1,9 @@
 # Plan: Despacho Inteligente Áudio–Vídeo (190/193)
 
+> **Superseded por `specs/002-triagem-consulta/`** — reancoragem ao contexto hospitalar do TC 4 por orientação do professor (23/07/2026). Mantida como registro de decisão.
+
 > Referência: `specs/001-despacho-audio-video/spec.md`  
-> **Status:** draft
+> **Status:** superseded
 
 ## Resumo técnico
 
@@ -27,12 +29,20 @@ Cada módulo entrega um `infer.py` com contrato JSON fixo — é isso que permit
 
 ```text
 A1/A2 → {transcricao, tipo_relato, local, tempo}
+         tipo_relato ∈ {agressao | ameaca | perseguicao | outro}
 A3    → {sofrimento: 0..1}
-V1    → {n_pessoas, tracks}
+V1    → {n_pessoas: int,
+         tracks: [ {id: int, n_frames: int, bbox_media: [x, y, w, h]} ]}
 V2    → {postura_defensiva: 0..1}
 V3    → {violencia: 0..1}
 C/D   → {escore, corroborado: bool, nota_ocorrencia}
 ```
+
+**Notas de schema (fechadas no clarify):**
+
+- `tipo_relato`: vocabulário fixo; termos fora do léxico caem em `outro` (fallback obrigatório — PLN nunca falha o contrato inventando labels).
+- `tracks` (V1): mínimo que a fusão consome (quantas pessoas, por quanto tempo, onde). Keypoints ficam **internos ao V2** e não trafegam neste contrato (evita schema pesado e acoplamento V1↔V2).
+- Após a Etapa 2 estes contratos são **imutáveis**.
 
 Enquanto os modelos não existem, P1 usa **stubs** (respostas fixas) para montar o pipeline — integração começa na Etapa 2, não no fim.
 
@@ -48,9 +58,23 @@ Enquanto os modelos não existem, P1 usa **stubs** (respostas fixas) para montar
 | Detecção / tracks (V1) | YOLOv8 + ByteTrack (sem treino) | Contagem e tracks prontos |
 | Postura (V2) | Keypoints + cabeça MLP/XGBoost (CPU) | Dataset anotado no sprint coletivo |
 | Violência (V3) | Classificador fine-tune no RLVS (Colab T4) | Meta acc ≥ 0,85 |
-| Fusão (C/D) | Regras: raio 300 m, janela ±10 min, escore ponderado | Orquestração simples, uma cabeça (P1) |
+| Fusão (C/D) | Regras: raio 300 m, janela ±10 min, escore ponderado (dict em `fusion/scoring`) | Orquestração simples, uma cabeça (P1) |
 | Dados sintéticos | `events.jsonl` | Integração e testes sem esperar modelos |
 | Anotação | CVAT / Label Studio (`defensiva` / `neutra`) | Sprint coletivo de frames |
+
+### Fusão — pesos do escore ponderado (C/D)
+
+Pesos são **regra documentada**, não aprendidos. Ajustáveis num único dict em `fusion/scoring`.
+
+| Sinal | Peso | Racional |
+|-------|------|----------|
+| `tipo_relato` grave (`agressao` / `ameaca`) | 0.25 | Sinal primário do relato |
+| `sofrimento` (A3) | 0.25 | Sinal primário da voz |
+| `violencia` (V3) | 0.25 | Sinal primário da cena |
+| `postura_defensiva` (V2) | 0.15 | Proxy mais fraco (proxy de proxy) |
+| corroboração espaçotemporal | 0.10 | Já atua como multiplicador de confiança; menor peso direto |
+
+Soma dos pesos = **1.00**. Sinais binários / contínuos entram normalizados em `0..1` antes da ponderação (detalhe de implementação na Etapa 2, sem mudar este dict).
 
 ## Arquitetura
 
@@ -60,12 +84,12 @@ Enquanto os modelos não existem, P1 usa **stubs** (respostas fixas) para montar
     → A3 emoção de voz              → {sofrimento}
 
 [.mp4 região, sob demanda]
-    → V1 YOLO+ByteTrack → {n_pessoas, tracks}
-    → V2 pose/postura   → {postura_defensiva}
+    → V1 YOLO+ByteTrack → {n_pessoas, tracks[{id, n_frames, bbox_media}]}
+    → V2 pose/postura   → {postura_defensiva}   # keypoints internos ao V2
     → V3 violência      → {violencia}
 
 [A* + V* + eventos]
-    → C/D correlação (300 m, ±10 min) + escore + nota
+    → C/D correlação (300 m, ±10 min) + escore ponderado (dict fusion/scoring) + nota
     → {escore, corroborado, nota_ocorrencia}
     → operador humano (decisão final)
 ```
@@ -83,11 +107,14 @@ src/
     v1_tracks/
     v2_pose/
     v3_violence/
-  fusion/             # C/D
-  stubs/
+  fusion/             # C/D (correlate, scoring, report)
+  stubs/              # infer() fixos até modelos reais
   run_event.py        # .wav + .mp4 → nota priorizada
 data/
-  events.jsonl        # sintético (fusão)
+  audio_ptbr/{raw,processed}/
+  video_violence/{raw,processed}/
+  pose_posture/{raw,annotations}/
+  fusion_synthetic/   # events.jsonl (P1)
 tests/
   ...
 ```
@@ -147,7 +174,10 @@ Cronologia de execução **sem janela de calendário fixa**. Cada Etapa é um ma
 
 | Decisão | Alternativas | Por quê esta |
 |---------|--------------|--------------|
-| Contratos imutáveis desde Etapa 2 | Evoluir schemas sob demanda | Paralelismo real entre P2–P5 |
+| Contratos imutáveis desde Etapa 2 | Evoluir schemas sob demanda | Paralelismo real entre P2–P5; schema fechado no clarify |
+| `tipo_relato` taxonomia fechada + `outro` | Labels abertas / LLM | Léxico distinguível por regras PT-BR; contrato nunca falha |
+| `tracks` mínimo (id, n_frames, bbox_media) | Expor keypoints no V1 | Fusão só precisa disso; V2 não acopla ao schema V1 |
+| Pesos C/D documentados (dict) | Pesos aprendidos | Ajuste manual em um único lugar; três sinais primários iguais |
 | Stubs na Etapa 1 | Esperar modelos para integrar | Integração cedo; risco de atraso de integração eliminado por desenho |
 | P1 só na fusão (sem treino) | Dividir C/D em par | Menos discussão, mais desbloqueio |
 | PLN por regras (A2) | LLM / NER treinado | Prazo e contrato estável |

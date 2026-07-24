@@ -1,28 +1,41 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "tech-challenge-4"
 version = "0.1.0"
-description = "Tech Challenge 4 — Spec-Driven Development"
+description = "Tech Challenge 4 — Despacho Inteligente Áudio–Vídeo (190/193)"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "tqdm>=4.66",
+    "requests>=2.31",
+    "librosa>=0.10",
+    "soundfile>=0.12",
+    "scikit-learn>=1.4",
+    "ultralytics>=8.1",
+    "opencv-python-headless>=4.9",
+    "torch>=2.2",
+    "torchvision>=0.17",
     "azure-cognitiveservices-speech>=1.51.0",
     "faster-whisper>=1.2.1",
     "python-dotenv>=1.2.2",
 ]
-
-[project.optional-dependencies]
+[dependency-groups]
 dev = ["pytest>=8.0"]
 
 [project.scripts]
 hello-sdd = "hello_sdd.__main__:main"
 
-[tool.setuptools.packages.find]
-where = ["src"]
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/hello_sdd" = "hello_sdd"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-pythonpath = ["src"]
+pythonpath = [".", "src"]

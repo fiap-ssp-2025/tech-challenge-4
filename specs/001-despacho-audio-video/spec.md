@@ -1,6 +1,8 @@
 # Spec: Despacho Inteligente Áudio–Vídeo (190/193)
 
-> **Status:** draft  
+> **Superseded por `specs/002-triagem-consulta/`** — reancoragem ao contexto hospitalar do TC 4 por orientação do professor (23/07/2026). Mantida como registro de decisão.
+
+> **Status:** superseded  
 > **Branch sugerida:** `feat/001-despacho-audio-video`  
 > **Criado em:** 2026-07-23
 
@@ -23,7 +25,7 @@ Centrais de emergência recebem áudio com relato e carga emocional, mas a corro
 #### Critérios de aceite
 
 - **WHEN** chega um áudio de ligação válido em PT-BR  
-  **THEN** o módulo A1/A2 devolve JSON com `transcricao`, `tipo_relato`, `local` e `tempo`
+  **THEN** o módulo A1/A2 devolve JSON com `transcricao`, `tipo_relato` ∈ {`agressao`|`ameaca`|`perseguicao`|`outro`}, `local` e `tempo`
 
 - **WHEN** o serviço de STT em nuvem está indisponível  
   **THEN** o sistema usa fallback offline e ainda produz a saída contratada (ou falha explícita documentada)
@@ -48,7 +50,8 @@ Centrais de emergência recebem áudio com relato e carga emocional, mas a corro
 #### Critérios de aceite
 
 - **WHEN** um clipe de vídeo da região é solicitado  
-  **THEN** V1 devolve `{n_pessoas, tracks}`, V2 `{postura_defensiva: 0..1}` e V3 `{violencia: 0..1}`
+  **THEN** V1 devolve `{n_pessoas: int, tracks: [{id, n_frames, bbox_media: [x,y,w,h]}]}`, V2 `{postura_defensiva: 0..1}` e V3 `{violencia: 0..1}`  
+  (keypoints de pose ficam internos ao V2 e **não** entram no contrato de `tracks`)
 
 ### US-4 — Fundir áudio e vídeo e priorizar
 
@@ -83,9 +86,9 @@ Centrais de emergência recebem áudio com relato e carga emocional, mas a corro
 | ID | Requisito | Prioridade |
 |----|-----------|------------|
 | RF-01 | Módulos expõem contrato JSON fixo via `infer` (A1/A2, A3, V1, V2, V3, C/D) | must |
-| RF-02 | A1/A2: `{transcricao, tipo_relato, local, tempo}` | must |
+| RF-02 | A1/A2: `{transcricao, tipo_relato, local, tempo}` com taxonomia fechada `tipo_relato` ∈ {`agressao`\|`ameaca`\|`perseguicao`\|`outro`}; termos fora do vocabulário caem em `outro` | must |
 | RF-03 | A3: `{sofrimento: 0..1}` | must |
-| RF-04 | V1: `{n_pessoas, tracks}` | must |
+| RF-04 | V1: `{n_pessoas: int, tracks: [{id: int, n_frames: int, bbox_media: [x, y, w, h]}]}` — mínimo consumido pela fusão; keypoints não trafegam neste contrato | must |
 | RF-05 | V2: `{postura_defensiva: 0..1}` | must |
 | RF-06 | V3: `{violencia: 0..1}` | must |
 | RF-07 | C/D: `{escore, corroborado: bool, nota_ocorrencia}` | must |
@@ -113,11 +116,13 @@ Centrais de emergência recebem áudio com relato e carga emocional, mas a corro
 - Modelo “perfeito”; basta passar no aceite / baseline
 - Dependência de datasets de reforço (VERBO, RWF-2000) se não chegarem a tempo — núcleo fecha com CORAA + RLVS
 
-## Perguntas em aberto
+## Perguntas resolvidas (clarify)
 
-- [ ] Pesos exatos do escore ponderado da fusão C/D (detalhar no plan se ainda implícitos)
-- [ ] Formato canônico de `tracks` em V1 (lista de IDs, bbox, etc.)
-- [ ] Taxonomia fechada de `tipo_relato` no PLN por regras
+- [x] Pesos do escore ponderado C/D → ver `plan.md` § Stack / Fusão
+- [x] Formato canônico de `tracks` (V1) → RF-04 e `plan.md` § Contratos
+- [x] Taxonomia fechada de `tipo_relato` (A2) → RF-02 e `plan.md` § Contratos
+
+> Contratos JSON ficam **imutáveis a partir da Etapa 2**. Este clarify é a última alteração de schema permitida antes do `/plan` / implementação.
 
 ## Notas
 
