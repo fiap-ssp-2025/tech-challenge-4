@@ -221,6 +221,17 @@ __marimo__/
 data/audio/
 data/**/raw/**
 !data/**/raw/.gitkeep
+data/**/processed/**
+!data/**/processed/.gitkeep
+data/**/annotations/**
+!data/**/annotations/.gitkeep
 runs/
 dummy.wav
 dummy.mp4
+
+# Modelos treinados localmente
+models/
+*.pt
+*.pth
+*.bin
+*.ckpt

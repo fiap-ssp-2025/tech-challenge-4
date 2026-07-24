@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "tech-challenge-4"
 version = "0.1.0"
-description = "Tech Challenge 4 — Despacho Inteligente Áudio–Vídeo (190/193)"
+description = "Tech Challenge 4 — Triagem Multimodal em Consultas (Saúde da Mulher)"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -23,6 +23,12 @@ dependencies = [
     "azure-cognitiveservices-speech>=1.51.0",
     "faster-whisper>=1.2.1",
     "python-dotenv>=1.2.2",
+    "gdown>=6.1.0",
+    "lapx>=0.5",
+    "transformers>=4.40",
+    "datasets>=2.19",
+    "evaluate>=0.4",
+    "accelerate>=0.30",
 ]
 [dependency-groups]
 dev = ["pytest>=8.0"]
