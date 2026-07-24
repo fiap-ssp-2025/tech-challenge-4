@@ -23,6 +23,11 @@ dependencies = [
     "azure-cognitiveservices-speech>=1.37",
     "python-dotenv>=1.0",
     "gdown>=6.1.0",
+    "lapx>=0.5",
+    "transformers>=4.40",
+    "datasets>=2.19",
+    "evaluate>=0.4",
+    "accelerate>=0.30",
 ]
 
 [dependency-groups]
