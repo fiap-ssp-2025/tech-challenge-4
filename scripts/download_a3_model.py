@@ -50,7 +50,9 @@ def main() -> int:
             repo_type="model",
             local_dir=str(args.local_dir),
             allow_patterns=ALLOW_PATTERNS,
-            token=os.environ.get("HF_TOKEN") or True,
+            # None = usa o token em cache se houver, senão tenta anônimo; True
+            # exigiria login até onde ele não é necessário (LocalTokenNotFoundError).
+            token=os.environ.get("HF_TOKEN") or None,
         )
     except (RepositoryNotFoundError, GatedRepoError):
         print(f"Sem acesso a {args.repo_id} (repositório privado).")
