@@ -70,9 +70,9 @@ Eventos → {session_id, modality, timestamp}
 
 ### Vídeo — face (T104) — detalhes operacionais
 
-- Fontes: RAVDESS speech video ([Zenodo 1188976](https://zenodo.org/record/1188976), `Video_Speech_Actor_01..24.zip`) + CREMA-D `VideoFlash` ([CheyneyComputerScience/CREMA-D](https://github.com/CheyneyComputerScience/CREMA-D), Git LFS).
-- Scripts: `download_ravdess.py` → `data/video_consulta/raw/ravdess/`; `download_cremad.py` → `data/video_consulta/raw/cremad/` (sparse checkout); `extract_face_frames.py` → `data/video_consulta/processed/faces/` + `labels.csv`; `verify_face_dataset.py`.
-- CREMA-D (decisão de peso): por padrão baixa LFS **somente** emoções `NEU|FEA|SAD` de atrizes (`--all-actors` para incluir homens). VideoFlash completo ~2 GB; o subconjunto cabe em centenas de MB.
+- Fontes: RAVDESS speech video ([Zenodo 1188976](https://zenodo.org/record/1188976), `Video_Speech_Actor_01..24.zip`) + CREMA-D `VideoFlash` via mirror [GitLab CREMA-D-mirror](https://gitlab.com/cs-cooper-lab/crema-d-mirror) (preferir; o [GitHub original](https://github.com/CheyneyComputerScience/CREMA-D) usa git-lfs e costuma falhar).
+- Scripts: `download_ravdess.py` → `data/video_consulta/raw/ravdess/`; `download_cremad.py` → `data/video_consulta/raw/cremad/` (sparse checkout do mirror); `extract_face_frames.py` → `data/video_consulta/processed/faces/` + `labels.csv`; `verify_face_dataset.py`.
+- CREMA-D (decisão de peso): por padrão o pipeline usa emoções `NEU|FEA|SAD` de atrizes (`--all-actors` para incluir homens). VideoFlash completo no mirror ~2.3 GB.
 - Rótulos pelo nome do arquivo (sem anotação manual). Binário V3: `desconforto` ← `{fearful,sad}`; `neutro` ← `{neutral,calm}` (`calm` entra em neutro para manter classe minoritária ≥ 40% no RAVDESS).
 - Split **por ator** (ids `ravdess_XX` / `crema_YYYY`); estratificação com atrizes primeiro. Notebook esqueleto: `notebooks/t112_fer_colab.ipynb` (treino = T112).
 - Detector default: YOLOv8n (pessoa) + recorte superior; alternativa `--detector haar`.

@@ -32,6 +32,7 @@ from src.video.v3_face.face_dataset import (
     assert_minority_ratio,
     assert_no_actor_leakage,
     assign_actor_splits,
+    balance_binary_labels,
     emotion_to_binary,
     load_cremad_sex_map,
     parse_cremad_filename,
@@ -231,6 +232,11 @@ def main() -> int:
         return 1
 
     df = pd.DataFrame(rows)
+    before = len(df)
+    df = balance_binary_labels(df, min_ratio=0.40, seed=args.seed)
+    if len(df) < before:
+        print(f"[balance] undersampled majority: {before} → {len(df)} rows")
+
     actors = [
         ActorInfo(actor_id=a, sex=sex, dataset=ds)
         for (a, sex, ds), _ in df.groupby(["actor", "sex", "dataset"])
@@ -245,6 +251,13 @@ def main() -> int:
 
     cols = ["path", "emotion", "actor", "dataset", "label", "split", "sex"]
     df = df[cols]
+
+    # Drop JPGs not kept after balancing (verify requires 1:1 count).
+    keep_names = {Path(p).name for p in df["path"]}
+    for jpg in args.out_dir.glob("*.jpg"):
+        if jpg.name not in keep_names:
+            jpg.unlink(missing_ok=True)
+
     df.to_csv(labels_path, index=False)
 
     assert_no_actor_leakage(df)
