@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Sparse-checkout CREMA-D VideoFlash into data/video_consulta/raw/cremad/.
 
-Repo: https://github.com/CheyneyComputerScience/CREMA-D
-Videos live in Git LFS under VideoFlash/ (*.flv). Full LFS pull is ~2 GB.
+Prefer the GitLab mirror (regular blobs, ~2.3 GB for VideoFlash) — the GitHub
+original uses git-lfs and often fails with HTTP 502:
+  https://gitlab.com/cs-cooper-lab/crema-d-mirror
+  (upstream: https://github.com/CheyneyComputerScience/CREMA-D)
 
-Decision (documented): by default pull ONLY emotions NEU/FEA/SAD for FEMALE
-actors (plan: female-prioritized FER). Use --all-actors / --emotions to widen.
-Metadata (VideoDemographics.csv, README, LICENSE) is always fetched.
+Decision (documented): by default verify/pull ONLY emotions NEU/FEA/SAD for
+FEMALE actors (plan: female-prioritized FER). Use --all-actors / --emotions
+to widen. Metadata (VideoDemographics.csv, README, LICENSE) is always fetched.
 """
 
 from __future__ import annotations
@@ -24,8 +26,10 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from src.video.v3_face.face_dataset import load_cremad_sex_map
+
 DEFAULT_RAW = ROOT / "data" / "video_consulta" / "raw" / "cremad"
-REPO_URL = "https://github.com/CheyneyComputerScience/CREMA-D.git"
+# GitLab mirror ships VideoFlash as normal git objects (no flaky GitHub LFS).
+DEFAULT_REPO_URL = "https://gitlab.com/cs-cooper-lab/crema-d-mirror.git"
 DEFAULT_EMOTIONS = ("NEU", "FEA", "SAD")
 
 
@@ -34,12 +38,12 @@ def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subproce
     return subprocess.run(cmd, cwd=cwd, check=check)
 
 
-def ensure_sparse_clone(raw_dir: Path) -> Path:
-    """Clone with sparse checkout of VideoFlash + demographics (no LFS objects yet)."""
+def ensure_sparse_clone(raw_dir: Path, repo_url: str) -> Path:
+    """Clone with sparse checkout of VideoFlash + demographics."""
     raw_dir.mkdir(parents=True, exist_ok=True)
     git_dir = raw_dir / ".git"
     if not git_dir.is_dir():
-        # Fresh sparse clone without downloading LFS blobs.
+        # Skip LFS smudge on clone; GitLab mirror usually has real blobs anyway.
         env_prefix = ["git", "-c", "filter.lfs.smudge=", "-c", "filter.lfs.process="]
         run(
             env_prefix
@@ -47,7 +51,7 @@ def ensure_sparse_clone(raw_dir: Path) -> Path:
                 "clone",
                 "--filter=blob:none",
                 "--sparse",
-                REPO_URL,
+                repo_url,
                 str(raw_dir),
             ]
         )
@@ -174,6 +178,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Sparse download CREMA-D VideoFlash (T104)")
     parser.add_argument("--raw-dir", type=Path, default=DEFAULT_RAW)
     parser.add_argument(
+        "--repo",
+        default=DEFAULT_REPO_URL,
+        help="Git remote (default: GitLab mirror; GitHub upstream needs LFS)",
+    )
+    parser.add_argument(
         "--emotions",
         nargs="+",
         default=list(DEFAULT_EMOTIONS),
@@ -193,11 +202,11 @@ def main() -> int:
     parser.add_argument(
         "--skip-lfs",
         action="store_true",
-        help="Only sparse-checkout pointers/metadata (no binary pull)",
+        help="Only sparse-checkout / skip LFS pull (GitLab mirror usually already has blobs)",
     )
     args = parser.parse_args()
 
-    ensure_sparse_clone(args.raw_dir)
+    ensure_sparse_clone(args.raw_dir, args.repo)
     demo = args.raw_dir / "VideoDemographics.csv"
     if not demo.is_file():
         raise SystemExit(f"Missing {demo} after sparse checkout")

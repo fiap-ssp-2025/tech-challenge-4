@@ -174,6 +174,35 @@ def assert_no_actor_leakage(df: pd.DataFrame) -> None:
     assert leaked.empty, f"Actors in multiple splits: {leaked.index.tolist()}"
 
 
+def balance_binary_labels(
+    df: pd.DataFrame,
+    *,
+    min_ratio: float = 0.40,
+    seed: int = 42,
+) -> pd.DataFrame:
+    """Undersample the majority binary class until minority share ≥ min_ratio.
+
+    Needed when CREMA-D (more FEA/SAD than NEU) dilutes the RAVDESS balance.
+    Keeps actor-wise rows intact for remaining samples; call assign_actor_splits
+    again after this if desired.
+    """
+    counts = df["label"].value_counts()
+    if len(counts) < 2:
+        return df.reset_index(drop=True)
+    minority_label = counts.idxmin()
+    majority_label = counts.idxmax()
+    n_min = int(counts[minority_label])
+    # minority / total >= min_ratio  ⇒  n_min / (n_min + n_maj) >= r
+    # ⇒ n_maj <= n_min * (1-r)/r
+    max_maj = int(n_min * (1.0 - min_ratio) / min_ratio)
+    maj = df[df["label"] == majority_label]
+    if len(maj) <= max_maj:
+        return df.reset_index(drop=True)
+    kept_maj = maj.sample(n=max_maj, random_state=seed)
+    out = pd.concat([df[df["label"] == minority_label], kept_maj], ignore_index=True)
+    return out.sample(frac=1.0, random_state=seed).reset_index(drop=True)
+
+
 def assert_minority_ratio(df: pd.DataFrame, min_ratio: float = 0.40) -> float:
     counts = df["label"].value_counts(normalize=True)
     minority = float(counts.min()) if len(counts) else 0.0

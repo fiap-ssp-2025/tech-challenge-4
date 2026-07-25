@@ -9,7 +9,7 @@
   - **Verificado:** `labels.csv` 933 linhas = 933 wavs em `processed/`; `verify_audio_dataset.py` prova zero locutor cruzando splits + amostra 5× 8 kHz mono; `pytest` verde; e-mail VERBO em `docs/verbo-solicitacao.md` (envio manual)
 - [ ] T103 P3: Azure Speech F0 + fallback (igual T003/001); PLN com nova taxonomia
 - [x] T104 P4: extrair frames faciais RAVDESS/CREMA-D (rosto via YOLOv8); labels de emoção pelo nome do arquivo; split por ator; notebook Colab
-  - **Verificado:** RAVDESS `labels.csv` 4032 = 4032 jpgs; minority 0.429≥0.40; zero ator cruzando splits (`verify_face_dataset.py`); `pytest` 26/26; notebook `notebooks/t112_fer_colab.ipynb`. CREMA-D: script sparse+LFS (`download_cremad.py`, atrizes NEU/FEA/SAD) — pull remoto flaky (HTTP 502); reexecutar localmente e `extract_face_frames.py --force` para incorporar.
+  - **Verificado:** RAVDESS+CREMA-D via mirror GitLab; após balanceamento `labels.csv` 20612 = 20612 jpgs; minority 0.40; zero ator cruzando splits; notebook `notebooks/t112_fer_colab.ipynb`. Adendo: `download_cremad.py` default = GitLab mirror; `balance_binary_labels` no extract.
 - [x] T105 P5: frames de corpo + CVAT (`defensiva`/`neutra`); sprint coletivo de anotação (~1h, todos)
   - **Verificado:** labels derivadas das emoções RAVDESS (fearful/sad→defensiva, neutral/calm/happy→neutra) como proxy; 11504 frames de 8 atores; 0 erros de detecção YOLOv8-pose; declarado como dado atuado no RNF-06
 

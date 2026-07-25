@@ -12,6 +12,7 @@ from src.video.v3_face.face_dataset import (
     assert_minority_ratio,
     assert_no_actor_leakage,
     assign_actor_splits,
+    balance_binary_labels,
     emotion_to_binary,
     parse_cremad_filename,
     parse_ravdess_filename,
@@ -71,6 +72,15 @@ def test_minority_ratio_gate():
     bad = pd.DataFrame({"label": ["desconforto"] * 90 + ["neutro"] * 10})
     with pytest.raises(AssertionError):
         assert_minority_ratio(bad, 0.40)
+
+
+def test_balance_binary_labels_undersamples_majority():
+    df = pd.DataFrame({"label": ["desconforto"] * 90 + ["neutro"] * 10, "actor": ["a"] * 100})
+    with pytest.raises(AssertionError):
+        assert_minority_ratio(df, 0.40)
+    balanced = balance_binary_labels(df, min_ratio=0.40, seed=0)
+    assert assert_minority_ratio(balanced, 0.40) >= 0.40
+    assert (balanced["label"] == "neutro").sum() == 10
 
 
 def test_labels_schema_fixture(tmp_path: Path):
