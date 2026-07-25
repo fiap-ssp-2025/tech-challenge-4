@@ -239,6 +239,9 @@ models/*
 # A3: os pesos (1,2 GB) ficam no Hugging Face; aqui só as métricas, como evidência.
 !models/a3_emotion_metrics.json
 !models/a3_threshold_metrics.json
+# V3: idem — pesos (343 MB) no Hugging Face, métricas versionadas aqui.
+!models/v3_face_metrics.json
+!models/v3_clip_metrics.json
 *.pt
 *.pth
 *.bin

@@ -66,6 +66,20 @@ uv run python scripts/download_a3_model.py       # → models/a3_emotion/
 Sem esse download o A3 cai para stub. Reprodução do zero: `scripts/train_a3_emotion.py`
 (~4 h em CPU) seguido de `scripts/eval_a3_threshold.py`, que calibra o limiar na validação.
 
+`models/v3_face/` (ViT do V3, ~343 MB) segue o mesmo arranjo — pesos no Hugging Face
+(`fiap-ssp-2025/tc4-v3-desconforto-facial`), métricas versionadas em
+`models/v3_face_metrics.json` e `models/v3_clip_metrics.json`:
+
+```bash
+uv run python scripts/download_v3_model.py       # → models/v3_face/
+```
+
+O diretório é auto-contido (`config.json` + `model.safetensors` + `preprocess.json`): carrega
+**offline**, sem baixar o backbone. O `preprocess.json` viaja junto porque o V3 pontua recortes
+de rosto — mudar recorte ou normalização sem mudar o peso degrada o modelo em silêncio.
+Reprodução do zero (GPU, ~40 min): `scripts/t112/run_t112_r3.sh` e depois
+`scripts/t112/export_v3_model.py`.
+
 Os pesos YOLO (`yolov8n.pt`, `yolov8n-pose.pt`) são baixados pela ultralytics no primeiro uso.
 Sem eles (ou sem o `.pkl`), os testes de V1/V2 reais são pulados e o pipeline usa os stubs.
 
@@ -76,15 +90,18 @@ uv run python -m src.fusion.generate_synthetic
 # → data/fusion_synthetic/events.jsonl
 ```
 
-## Quem substitui qual stub
+## Situação dos módulos
 
-| Papel | Módulo real | Stub atual |
-|-------|-------------|------------|
-| **P2** | `src/audio/a3_emotion/` (T110) | `src/stubs/a3_emotion.py` |
-| **P3** | `src/audio/a1_stt/`, `src/audio/a2_nlp/` (T103/T111) | `src/stubs/a1_stt.py`, `src/stubs/a2_nlp.py` |
-| **P4** | `src/video/v3_face/` (T112) | `src/stubs/v3_face.py` |
-| **P5** | `src/video/v1_tracks/`, `src/video/v2_pose/` — **reais** | — |
-| **P1** | `src/fusion/` (já real), `src/resolve.py`, `src/run_event.py`, contratos | — |
+**Os seis módulos rodam reais.** Os stubs continuam existindo como rede de segurança: sem o
+pacote, o artefato treinado ou a credencial, `src/resolve.py` cai para eles e loga o motivo.
+
+| Papel | Módulo | Precisa de |
+|-------|--------|-----------|
+| **P2** | `src/audio/a3_emotion/` (T110) | `models/a3_emotion/` (download) |
+| **P3** | `src/audio/a1_stt/`, `src/audio/a2_nlp/` (T111) | nada — o A1 tem fallback offline |
+| **P4** | `src/video/v3_face/` (T112) | `models/v3_face/` (download) |
+| **P5** | `src/video/v1_tracks/`, `src/video/v2_pose/` (T113) | pesos YOLO + `.pkl` versionado |
+| **P1** | `src/fusion/`, `src/resolve.py`, `src/run_event.py`, contratos | — |
 
 Contratos JSON em `src/contracts/` — **imutáveis a partir da Etapa 2**.
 

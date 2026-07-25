@@ -59,6 +59,7 @@ class ModuleSpec:
 
 V2_POSTURE_HEAD = ROOT / "models" / "v2_posture_head.pkl"
 A3_EMOTION_DIR = ROOT / "models" / "a3_emotion"
+V3_FACE_DIR = ROOT / "models" / "v3_face"
 
 REGISTRY: dict[str, ModuleSpec] = {
     "a1_stt": ModuleSpec(
@@ -108,7 +109,10 @@ REGISTRY: dict[str, ModuleSpec] = {
         key="v3",
         real="src.video.v3_face.infer",
         stub="src.stubs.v3_face",
-        hint="T112/P4 entrega o FER de desconforto facial",
+        # ultralytics faz o recorte de rosto; transformers carrega o ViT do T112.
+        packages=("ultralytics", "transformers"),
+        artifacts=(V3_FACE_DIR,),
+        hint="uv run python scripts/download_v3_model.py",
     ),
 }
 
