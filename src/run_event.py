@@ -5,13 +5,13 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-from src.audio.a1_stt.infer import infer as infer_a1_stt
 from src.fusion.correlate import within_correlation
 from src.fusion.report import build_report
-from src.stubs import a2_nlp, a3_emotion, v1_tracks, v2_pose, v3_face
+from src.resolve import ResolvedPipeline
 
 # Default demo session — áudio e vídeo da MESMA consulta.
 DEFAULT_SESSION_ID = "consulta-demo"
@@ -28,6 +28,7 @@ def run_pipeline(
     session_id: str = DEFAULT_SESSION_ID,
     audio_ts: str | None = None,
     video_ts: str | None = None,
+    modules: ResolvedPipeline | None = None,
 ) -> dict:
     """A1→A2→A3→alert→session correlation→V1/V2/V3→score→triage note."""
     audio_path = Path(audio_path)
@@ -37,22 +38,28 @@ def run_pipeline(
     if not video_path.is_file():
         raise FileNotFoundError(f"vídeo não encontrado: {video_path}")
 
+    started = time.perf_counter()
+    mods = modules if modules is not None else ResolvedPipeline()
+
     # --- Áudio (gatilho) ---
     transcricao: str | None = None
 
     try:
-        a1 = infer_a1_stt(audio_path)
+        a1 = mods.call("a1_stt", audio_path)
         transcricao = a1["transcricao"]
-        provedor = a1.get("provedor", "não informado")
-        print(f"[A1] Transcrição concluída com {provedor}.")
+        if mods.origin("a1_stt") == "stub":
+            print("[A1] STT stub OK.")
+        else:
+            provedor = a1.get("provedor", "não informado")
+            print(f"[A1] STT real OK ({provedor}).")
     except RuntimeError as exc:
         print(f"[A1] Falha na transcrição: {exc}")
         print("[A1] Continuando o pipeline sem transcrição.")
 
-    a12 = a2_nlp.infer(audio_path, transcricao=transcricao)
+    a12 = mods.call("a2_nlp", audio_path, transcricao=transcricao)
     print(f"[A2] tipo_relato={a12['tipo_relato']} local={a12['local']}")
 
-    a3 = a3_emotion.infer(audio_path)
+    a3 = mods.call("a3_emotion", audio_path)
     print(f"[A3] sofrimento={a3['sofrimento']:.2f}")
 
     print("[alerta] Sinais na fala — analisando o vídeo da mesma consulta.")
@@ -75,9 +82,9 @@ def run_pipeline(
     print(f"[C] correlação por sessão → corroborado={corroborado}")
 
     # --- Vídeo (mesma consulta) ---
-    v1 = v1_tracks.infer(video_path)
-    v2 = v2_pose.infer(video_path)
-    v3 = v3_face.infer(video_path)
+    v1 = mods.call("v1_tracks", video_path)
+    v2 = mods.call("v2_pose", video_path)
+    v3 = mods.call("v3_face", video_path)
     print(
         f"[V1] n_pessoas={v1['n_pessoas']} | "
         f"[V2] postura={v2['postura_defensiva']:.2f} | "
@@ -88,6 +95,12 @@ def run_pipeline(
         a12=a12, a3=a3, v1=v1, v2=v2, v3=v3, corroborado=corroborado
     )
     print(f"[D] escore={cd['escore']:.3f}")
+
+    total_ms = (time.perf_counter() - started) * 1000
+    resolved = mods.origins()
+    tempos_ms = mods.timings_ms()
+    _print_timings(resolved, tempos_ms, total_ms)
+
     return {
         "a12": a12,
         "a3": a3,
@@ -97,7 +110,20 @@ def run_pipeline(
         "cd": cd,
         "audio_event": audio_event,
         "video_event": video_event,
+        "resolved": resolved,
+        "tempos_ms": tempos_ms,
+        "total_ms": round(total_ms, 1),
     }
+
+
+def _print_timings(
+    resolved: dict[str, str], tempos_ms: dict[str, float], total_ms: float
+) -> None:
+    """Per-module inference time — exigido no aceite da Etapa 3."""
+    print("[tempo] inferência por módulo (ms):")
+    for key, ms in tempos_ms.items():
+        print(f"[tempo]   {key:<3} {ms:>9.1f} ms  ({resolved.get(key, '?')})")
+    print(f"[tempo]   {'total':<3} {total_ms:>9.1f} ms (pipeline completo)")
 
 
 def make_dummy_media(

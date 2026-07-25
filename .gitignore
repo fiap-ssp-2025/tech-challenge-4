@@ -226,11 +226,16 @@ data/**/processed/**
 data/**/annotations/**
 !data/**/annotations/.gitkeep
 runs/
+Ultralytics/
 dummy.wav
 dummy.mp4
 
 # Modelos treinados localmente
-models/
+# Exceção: a cabeça de postura do V2 (~700 KB) é versionada para o pipeline real
+# funcionar num clone limpo. Regeneração: scripts/train_v2_posture.py (seed 42).
+models/*
+!models/v2_posture_head.pkl
+!models/v2_posture_metrics.json
 *.pt
 *.pth
 *.bin

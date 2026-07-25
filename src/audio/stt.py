@@ -78,4 +78,5 @@ def infer(audio_path: str | Path) -> dict[str, str]:
 
     return {
         "transcricao": resultado["transcricao"],
+        "provedor": resultado["provedor"],
     }
