@@ -218,6 +218,7 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Project — despacho áudio/vídeo
+data/audio/
 data/**/raw/**
 !data/**/raw/.gitkeep
 data/**/processed/**

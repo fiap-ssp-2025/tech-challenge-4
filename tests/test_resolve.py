@@ -71,11 +71,18 @@ def test_missing_artifact_falls_back_to_stub_with_reason(monkeypatch, tmp_path, 
     assert resolved.infer(Path("qualquer.mp4"))["stub"] is True
 
 
-def test_missing_credential_falls_back_to_stub(monkeypatch):
-    monkeypatch.delenv("AZURE_SPEECH_KEY", raising=False)
+def test_missing_stt_package_falls_back_to_stub(monkeypatch):
+    """Sem azure-speech / faster-whisper o A1 cai para stub (Azure é opcional em runtime)."""
+    spec = replace(
+        REGISTRY["a1_stt"],
+        packages=("pacote_stt_inexistente_xyz",),
+        env_vars=(),
+    )
+    monkeypatch.setitem(REGISTRY, "a1_stt", spec)
+
     resolved = get_module("a1_stt")
     assert resolved.origin == "stub"
-    assert "credencial ausente" in resolved.reason
+    assert "pacote ausente" in resolved.reason
 
 
 def test_real_that_only_reexports_the_stub_is_reported_as_stub(monkeypatch):

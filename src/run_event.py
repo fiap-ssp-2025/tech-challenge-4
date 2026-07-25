@@ -43,18 +43,18 @@ def run_pipeline(
 
     # --- Áudio (gatilho) ---
     transcricao: str | None = None
+
     try:
         a1 = mods.call("a1_stt", audio_path)
         transcricao = a1["transcricao"]
         if mods.origin("a1_stt") == "stub":
-            print("[A1] STT stub OK (credenciais Azure presentes; API não chamada).")
+            print("[A1] STT stub OK.")
         else:
-            print("[A1] STT real OK (Azure Speech).")
+            provedor = a1.get("provedor", "não informado")
+            print(f"[A1] STT real OK ({provedor}).")
     except RuntimeError as exc:
-        print(f"[A1] {exc}")
-        print(
-            "[A1] Continuando com stub A2 até P3 entregar Azure real / faster-whisper."
-        )
+        print(f"[A1] Falha na transcrição: {exc}")
+        print("[A1] Continuando o pipeline sem transcrição.")
 
     a12 = mods.call("a2_nlp", audio_path, transcricao=transcricao)
     print(f"[A2] tipo_relato={a12['tipo_relato']} local={a12['local']}")

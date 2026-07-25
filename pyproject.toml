@@ -20,8 +20,9 @@ dependencies = [
     "opencv-python-headless>=4.9",
     "torch>=2.2",
     "torchvision>=0.17",
-    "azure-cognitiveservices-speech>=1.37",
-    "python-dotenv>=1.0",
+    "azure-cognitiveservices-speech>=1.51.0",
+    "faster-whisper>=1.2.1",
+    "python-dotenv>=1.2.2",
     "gdown>=6.1.0",
     "lapx>=0.5",
     "transformers>=4.40",
@@ -29,7 +30,6 @@ dependencies = [
     "evaluate>=0.4",
     "accelerate>=0.30",
 ]
-
 [dependency-groups]
 dev = ["pytest>=8.0"]
 

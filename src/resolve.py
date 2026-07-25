@@ -65,8 +65,9 @@ REGISTRY: dict[str, ModuleSpec] = {
         key="a1",
         real="src.audio.a1_stt.infer",
         stub="src.stubs.a1_stt",
-        env_vars=("AZURE_SPEECH_KEY",),
-        hint="preencha AZURE_SPEECH_KEY no .env (T103/P3)",
+        # Azure é preferencial; sem chave o infer real cai para faster-whisper.
+        packages=("azure.cognitiveservices.speech", "faster_whisper"),
+        hint="uv sync + AZURE_SPEECH_KEY no .env (ou só faster-whisper offline)",
     ),
     "a2_nlp": ModuleSpec(
         name="a2_nlp",
