@@ -144,6 +144,14 @@ def test_registry_artifact_matches_the_dir_the_a3_module_loads():
     assert resolve.A3_EMOTION_DIR in resolve.REGISTRY["a3_emotion"].artifacts
 
 
+def test_registry_artifact_matches_the_dir_the_v3_module_loads():
+    """Guarda contra o registry e o módulo do P4 divergirem sobre o modelo."""
+    from src.video.v3_face.infer import MODEL_DIR
+
+    assert MODEL_DIR == resolve.V3_FACE_DIR
+    assert resolve.V3_FACE_DIR in resolve.REGISTRY["v3_face"].artifacts
+
+
 # --- chaves de ambiente ------------------------------------------------------
 
 

@@ -1,0 +1,28 @@
+{
+  "f1_macro_test": 0.7045,
+  "arch": "vit_fer",
+  "lr": 3e-05,
+  "best_epoch": 10,
+  "sweep": "v3",
+  "tta": false,
+  "config": {
+    "arch": "vit_fer",
+    "lr": 3e-05,
+    "note": "backbone ja treinado em expressao facial"
+  },
+  "dropped_emotions": [],
+  "val_f1_macro": 0.688,
+  "n_train": 14388,
+  "n_val": 2996,
+  "n_test": 3228,
+  "runs": [
+    {
+      "run": "efficientnet_b0@0.0003",
+      "val_f1": 0.6815
+    },
+    {
+      "run": "vit_fer@3e-05",
+      "val_f1": 0.688
+    }
+  ]
+}
