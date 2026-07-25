@@ -20,3 +20,8 @@ criados **manualmente pelo P1** — enquanto não existir `AZURE_SPEECH_KEY`, o 
 `--raw-dir` de `extract_pose_frames.py` (`data/pose_posture/raw`) não bate com o destino do
 `download_ravdess.py` (`data/video_consulta/raw/ravdess`); o V1 chama `model.track()` sem
 `stream=True` e acumula resultados em RAM (alerta da ultralytics) — revisar antes da demo longa.
+`pyproject.toml` declara `opencv-python-headless>=4.9`, mas o `uv.lock` resolveu
+`opencv-python==5.0.0.93` (variante cheia, não headless); essa versão não expõe mais
+`cv2.CascadeClassifier`, então `--detector haar` de `extract_face_frames.py` quebra neste ambiente.
+Não bloqueia T112 (default é `--detector yolo`, usado no dataset atual) — revisar o pin do opencv
+antes de reativar o caminho haar.
