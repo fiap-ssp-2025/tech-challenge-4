@@ -58,6 +58,7 @@ class ModuleSpec:
 
 
 V2_POSTURE_HEAD = ROOT / "models" / "v2_posture_head.pkl"
+A3_EMOTION_DIR = ROOT / "models" / "a3_emotion"
 
 REGISTRY: dict[str, ModuleSpec] = {
     "a1_stt": ModuleSpec(
@@ -81,7 +82,9 @@ REGISTRY: dict[str, ModuleSpec] = {
         key="a3",
         real="src.audio.a3_emotion.infer",
         stub="src.stubs.a3_emotion",
-        hint="T110/P2 entrega o wav2vec2 PT-BR",
+        packages=("transformers",),
+        artifacts=(A3_EMOTION_DIR,),
+        hint="uv run python scripts/train_a3_emotion.py (ou baixe o modelo publicado — ver README)",
     ),
     "v1_tracks": ModuleSpec(
         name="v1_tracks",

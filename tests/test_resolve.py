@@ -97,7 +97,10 @@ def test_real_that_only_reexports_the_stub_is_reported_as_stub(monkeypatch):
 
 
 def test_broken_real_import_falls_back_to_stub(monkeypatch):
-    spec = replace(REGISTRY["a3_emotion"], real="src.audio.a3_emotion.nao_existe")
+    # artifacts=() so the artifact probe doesn't fire before the import attempt.
+    spec = replace(
+        REGISTRY["a3_emotion"], real="src.audio.a3_emotion.nao_existe", artifacts=()
+    )
     monkeypatch.setitem(REGISTRY, "a3_emotion", spec)
 
     resolved = get_module("a3_emotion")
@@ -131,6 +134,14 @@ def test_registry_artifact_matches_the_path_the_v2_module_loads():
     from src.video.v2_pose.infer import MODEL_PATH
 
     assert MODEL_PATH == resolve.V2_POSTURE_HEAD
+
+
+def test_registry_artifact_matches_the_dir_the_a3_module_loads():
+    """Guarda contra o registry e o módulo do P2 divergirem sobre o modelo."""
+    from src.audio.a3_emotion.infer import MODEL_DIR
+
+    assert MODEL_DIR == resolve.A3_EMOTION_DIR
+    assert resolve.A3_EMOTION_DIR in resolve.REGISTRY["a3_emotion"].artifacts
 
 
 # --- chaves de ambiente ------------------------------------------------------
