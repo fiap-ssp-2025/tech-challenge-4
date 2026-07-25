@@ -1,0 +1,8 @@
+{
+  "f1_macro_test": 0.7171,
+  "n_train": 666,
+  "n_val": 166,
+  "n_test": 101,
+  "base_checkpoint": "jonatasgrosman/wav2vec2-large-xlsr-53-portuguese",
+  "trainable_layers": 4
+}

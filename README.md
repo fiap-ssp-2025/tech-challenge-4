@@ -51,6 +51,18 @@ uv run python scripts/extract_pose_frames.py --raw-dir data/video_consulta/raw/r
 uv run python scripts/train_v2_posture.py    # seed 42, split por ator → F1 macro 0,6868
 ```
 
+`models/a3_emotion/` (wav2vec2 do A3, ~1,2 GB) **não é versionado** — fica num repositório
+privado no Hugging Face. As métricas ficam no git como evidência
+(`models/a3_emotion_metrics.json`, `models/a3_threshold_metrics.json`):
+
+```bash
+uv run hf auth login                             # acesso de leitura: peça ao P2
+uv run python scripts/download_a3_model.py       # → models/a3_emotion/
+```
+
+Sem esse download o A3 cai para stub. Reprodução do zero: `scripts/train_a3_emotion.py`
+(~4 h em CPU) seguido de `scripts/eval_a3_threshold.py`, que calibra o limiar na validação.
+
 Os pesos YOLO (`yolov8n.pt`, `yolov8n-pose.pt`) são baixados pela ultralytics no primeiro uso.
 Sem eles (ou sem o `.pkl`), os testes de V1/V2 reais são pulados e o pipeline usa os stubs.
 

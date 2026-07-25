@@ -11,6 +11,10 @@ reportado não ter vazamento. O contrato A3 devolve `sofrimento` como score cont
 [0..1], então o limiar não é aplicado aqui: ele é informação para a camada de fusão
 (T114) e para o go/no-go (T120).
 
+A pontuação delega em `a3_emotion.infer()`, de propósito: o limiar precisa ser calibrado
+sobre exatamente o mesmo regime de inferência que roda em produção (janelas de 6 s com
+média). Reimplementar a lógica aqui a faria divergir em silêncio.
+
 Uso:
     uv run python scripts/eval_a3_threshold.py
 """
@@ -28,26 +32,22 @@ from sklearn.metrics import classification_report, f1_score, roc_auc_score
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_LABELS = ROOT / "data" / "audio_ptbr" / "labels.csv"
 DEFAULT_MODEL_DIR = ROOT / "models" / "a3_emotion"
-TARGET_SR = 16_000
-MAX_DURATION_S = 6.0  # igual ao treino
 LABEL2ID = {"neutral": 0, "non_neutral": 1}
 
 
-def score_split(df: pd.DataFrame, split: str, model, feature_extractor) -> tuple[np.ndarray, np.ndarray]:
-    import librosa
-    import torch
+def score_split(df: pd.DataFrame, split: str) -> tuple[np.ndarray, np.ndarray]:
+    """Pontua um split chamando o `infer()` real.
+
+    Delegar em vez de reimplementar é deliberado: o A3 pontua em janelas de 6 s com
+    média, e uma cópia local dessa lógica sairia de sincronia com `infer.py` sem
+    ninguém perceber — calibrando o limiar num regime e servindo noutro.
+    """
+    from src.audio.a3_emotion.infer import infer
 
     sub = df[df.split == split].reset_index(drop=True)
-    max_samples = int(TARGET_SR * MAX_DURATION_S)
     scores, labels = [], []
     for _, row in sub.iterrows():
-        audio, _ = librosa.load(ROOT / row["path"], sr=TARGET_SR, mono=True)
-        if len(audio) > max_samples:
-            audio = audio[:max_samples]
-        inputs = feature_extractor(audio, sampling_rate=TARGET_SR, return_tensors="pt")
-        with torch.no_grad():
-            logits = model(**inputs).logits
-        scores.append(float(torch.softmax(logits, dim=-1)[0][LABEL2ID["non_neutral"]]))
+        scores.append(float(infer(ROOT / row["path"])["sofrimento"]))
         labels.append(LABEL2ID[row["label"]])
     return np.array(scores), np.array(labels)
 
@@ -63,22 +63,16 @@ def main() -> int:
         print("Rode antes: uv run python scripts/train_a3_emotion.py")
         return 1
 
-    from transformers import AutoFeatureExtractor, Wav2Vec2ForSequenceClassification
-
-    feature_extractor = AutoFeatureExtractor.from_pretrained(str(args.model_dir))
-    model = Wav2Vec2ForSequenceClassification.from_pretrained(str(args.model_dir))
-    model.eval()
-
     df = pd.read_csv(args.labels)
 
-    val_scores, val_y = score_split(df, "val", model, feature_extractor)
+    val_scores, val_y = score_split(df, "val")
     grid = np.arange(0.02, 0.99, 0.01)
     val_f1 = [f1_score(val_y, (val_scores >= t).astype(int), average="macro") for t in grid]
     best_t = float(grid[int(np.argmax(val_f1))])
     print(f"VAL   n={len(val_y)} non_neutral={int(val_y.sum())} AUC={roc_auc_score(val_y, val_scores):.4f}")
     print(f"VAL   limiar escolhido = {best_t:.2f} (F1 macro val = {max(val_f1):.4f})")
 
-    test_scores, test_y = score_split(df, "test", model, feature_extractor)
+    test_scores, test_y = score_split(df, "test")
     print(f"\nTESTE n={len(test_y)} non_neutral={int(test_y.sum())} AUC={roc_auc_score(test_y, test_scores):.4f}")
 
     results = {}

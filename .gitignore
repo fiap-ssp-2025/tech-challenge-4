@@ -236,6 +236,9 @@ dummy.mp4
 models/*
 !models/v2_posture_head.pkl
 !models/v2_posture_metrics.json
+# A3: os pesos (1,2 GB) ficam no Hugging Face; aqui só as métricas, como evidência.
+!models/a3_emotion_metrics.json
+!models/a3_threshold_metrics.json
 *.pt
 *.pth
 *.bin
