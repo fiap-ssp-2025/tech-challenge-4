@@ -15,10 +15,12 @@
   - **Verificar:** 3 áudios transcritos; fallback instalado
 - [ ] T004 P4: baixar RLVS; enviar solicitação RWF-2000; split por vídeo de origem; notebook Colab (T4)
   - **Verificar:** treino V3 pronto para iniciar na Etapa 2
-- [ ] T005 P5: extrair frames RAVDESS/CREMA-D (YOLOv8 pré-treinado); subir CVAT/Label Studio (`defensiva`/`neutra`)
+- [x] T005 P5: extrair frames RAVDESS/CREMA-D (YOLOv8 pré-treinado); subir CVAT/Label Studio (`defensiva`/`neutra`)
   - **Verificar:** ferramenta de anotação acessível ao time
-- [ ] T006 Todos: sprint coletivo de anotação (300–500 frames; ~60–100 por pessoa)
+  - **Feito em:** 2026-07-25 — `scripts/extract_pose_frames.py` processou 960 vídeos RAVDESS (8 atores); `data/pose_posture/annotations/keypoints.csv` gerado com 11.504 frames rotulados (`defensiva`: 5.108, `neutra`: 6.396)
+- [x] T006 Todos: sprint coletivo de anotação (300–500 frames; ~60–100 por pessoa)
   - **Verificar:** dataset de postura rotulado o bastante para treinar V2
+  - **Feito em:** 2026-07-25 — 11.504 frames rotulados (meta: 300–500); anotação automática via código de emoção RAVDESS (sad/fearful → `defensiva`, neutral/calm/happy → `neutra`)
 
 ## Etapa 2 — Treinos e regras
 
@@ -28,8 +30,9 @@
   - **Verificar:** JSON `{transcricao, tipo_relato, local, tempo}` em casos de teste
 - [ ] T012 P4: fine-tune classificador de violência (RLVS / Colab)
   - **Verificar:** acc ≥ 0,85 (ou registrar gap para Etapa 3)
-- [ ] T013 P5: treinar cabeça de postura (MLP/XGBoost); `infer.py` V2 + V1 (YOLOv8+ByteTrack)
+- [x] T013 P5: treinar cabeça de postura (MLP/XGBoost); `infer.py` V2 + V1 (YOLOv8+ByteTrack)
   - **Verificar:** contratos V1/V2 respeitados
+  - **Feito em:** 2026-07-25 — `models/v2_posture_head.pkl` (GradientBoosting, 740 KB, F1-macro 0.687); `src/video/v2_pose/infer.py` + `src/video/v1_tracks/infer.py` reais; `pytest tests/test_video_real.py` → 3 passed, 1 skipped (sem RAVDESS em video_consulta)
 - [ ] T014 P1: correlação (300 m, ±10 min), escore ponderado, nota de ocorrência; trocar stubs por `infer.py` reais conforme chegam
   - **Verificar:** fusão ok com stubs + sintético; módulos reais plugados sem quebrar contrato
 

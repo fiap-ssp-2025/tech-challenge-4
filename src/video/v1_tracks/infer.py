@@ -26,11 +26,15 @@ def infer(path: str | Path) -> V1Result:
         raise FileNotFoundError(f"Video not found: {video_path}")
 
     model = _get_model()
+
+    # stream=True yields one Result at a time instead of loading all frames into
+    # RAM — critical for long videos that would otherwise OOM on demo machines.
     results = model.track(
         source=str(video_path),
         persist=True,
         tracker="bytetrack.yaml",
         classes=[0],   # class 0 = person
+        stream=True,
         verbose=False,
     )
 
