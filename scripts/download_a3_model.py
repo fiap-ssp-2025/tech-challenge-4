@@ -5,9 +5,9 @@ Os pesos do A3 têm ~1,2 GB e não cabem no git, então ficam num repositório *
 no Hub. Sem eles, `src/resolve.py` marca o A3 como "artefato ausente" e o pipeline cai
 para o stub.
 
-Autenticação: o repositório é privado, então é preciso estar logado
-(`uv run hf auth login`) ou exportar `HF_TOKEN` no ambiente. Peça acesso de leitura ao
-P2 se receber 401/403.
+Autenticação: o repositório é privado, sob a organização `fiap-ssp-2025` no Hub. É preciso
+ser membro da org (papel `read` basta) e estar logado (`uv run hf auth login`) ou exportar
+`HF_TOKEN`. Se receber 401/403, peça ao P2 para te adicionar à organização.
 
 Idempotente: o `snapshot_download` reaproveita o cache e só baixa o que falta.
 
@@ -23,7 +23,7 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_REPO_ID = "marsiqueira/tc4-a3-sofrimento-voz"
+DEFAULT_REPO_ID = "fiap-ssp-2025/tc4-a3-sofrimento-voz"
 DEFAULT_LOCAL_DIR = ROOT / "models" / "a3_emotion"
 # training_args.bin e _checkpoints/ não são publicados; o README é do card, não do modelo.
 ALLOW_PATTERNS = [
@@ -56,7 +56,8 @@ def main() -> int:
         )
     except (RepositoryNotFoundError, GatedRepoError):
         print(f"Sem acesso a {args.repo_id} (repositório privado).")
-        print("Rode `uv run hf auth login` ou exporte HF_TOKEN, e peça leitura ao P2.")
+        print("Rode `uv run hf auth login` ou exporte HF_TOKEN.")
+        print("Se persistir, peça ao P2 para te adicionar à org fiap-ssp-2025 (papel `read`).")
         return 1
 
     missing = [f for f in ALLOW_PATTERNS if not (Path(path) / f).is_file()]

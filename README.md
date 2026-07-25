@@ -55,8 +55,11 @@ uv run python scripts/train_v2_posture.py    # seed 42, split por ator → F1 ma
 privado no Hugging Face. As métricas ficam no git como evidência
 (`models/a3_emotion_metrics.json`, `models/a3_threshold_metrics.json`):
 
+O repo é `fiap-ssp-2025/tc4-a3-sofrimento-voz`, privado sob a organização do time — é
+preciso ser membro (papel `read` basta; peça ao P2).
+
 ```bash
-uv run hf auth login                             # acesso de leitura: peça ao P2
+uv run hf auth login
 uv run python scripts/download_a3_model.py       # → models/a3_emotion/
 ```
 
