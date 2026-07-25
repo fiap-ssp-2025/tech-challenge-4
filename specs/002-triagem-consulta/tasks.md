@@ -16,6 +16,7 @@
 ## Etapa 2 — Treinos e regras
 - [x] T110 P2: fine-tune wav2vec2 PT-BR — F1 ≥ 0,75
   - **Verificado:** `wav2vec2-large-xlsr-53-portuguese`, 4 blocos superiores + cabeça treináveis, 8 épocas em CPU; split por locutor (train 666 / val 166 / test 101). F1 macro **0,7171** no limiar padrão 0,50 e **0,7705** no limiar 0,17 calibrado na validação (`scripts/eval_a3_threshold.py`) — **meta atingida no limiar calibrado**. AUC 0,92 val / 0,84 teste. O contrato A3 devolve `sofrimento` como score contínuo, então o limiar é decisão da fusão (T114) e do go/no-go (T120), não do A3. `pytest tests/test_a3_emotion.py` 2/2 verde. Ressalva: teste tem só 23 amostras `non_neutral`, estimativa com incerteza alta.
+  - **Integração (P1):** rebase sobre a main pós-T114; `resolve.py` declara `packages`/`artifacts` do A3 (sem `models/a3_emotion/` o mapa mostra "artefato ausente" e cai para stub, em vez de anunciar real e degradar em execução); inferência em janelas de 6 s (mesma duração do treino), média dos scores. **Pendente P2:** publicar o modelo no Hugging Face e versionar `metrics.json`/`threshold_metrics.json` como `models/a3_*.json`.
 - [ ] T111 P3: `infer.py` real A1/A2
 - [ ] T112 P4: fine-tune FER (desconforto facial) — F1 ≥ 0,70
 - [x] T113 P5: cabeça de postura + V1 — contratos respeitados

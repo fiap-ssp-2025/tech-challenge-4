@@ -8,6 +8,7 @@ from src.contracts import A3Result, validate_a3
 
 MODEL_DIR = Path(__file__).resolve().parents[3] / "models" / "a3_emotion"
 TARGET_SR = 16_000
+WINDOW_S = 6.0  # must match MAX_DURATION_S in scripts/train_a3_emotion.py
 MAX_DURATION_S = 30.0  # guard against pathological long inputs at inference time
 NON_NEUTRAL_ID = 1  # must match LABEL2ID in scripts/train_a3_emotion.py
 
@@ -47,11 +48,20 @@ def infer(path: str | Path) -> A3Result:
     if len(y) > max_samples:
         y = y[:max_samples]
 
-    inputs = feature_extractor(y, sampling_rate=TARGET_SR, return_tensors="pt")
+    # The model was fine-tuned on clips capped at WINDOW_S seconds; longer audio
+    # is scored in windows of that size and averaged, never fed in one pass.
+    window = int(TARGET_SR * WINDOW_S)
+    chunks = [y[i : i + window] for i in range(0, len(y), window)] or [y]
+    if len(chunks) > 1 and len(chunks[-1]) < int(0.5 * TARGET_SR):
+        chunks.pop()  # a sub-half-second tail is noise, not signal
+
+    scores = []
     with torch.no_grad():
-        logits = model(**inputs).logits
-    probs = torch.softmax(logits, dim=-1)[0]
-    score = float(probs[NON_NEUTRAL_ID])
+        for chunk in chunks:
+            inputs = feature_extractor(chunk, sampling_rate=TARGET_SR, return_tensors="pt")
+            logits = model(**inputs).logits
+            scores.append(float(torch.softmax(logits, dim=-1)[0][NON_NEUTRAL_ID]))
+    score = sum(scores) / len(scores)
 
     return validate_a3({"sofrimento": score})
 
