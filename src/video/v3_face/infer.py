@@ -18,6 +18,7 @@ import cv2
 import numpy as np
 
 from src.contracts import V3Result, validate_v3
+from src.video.v3_face.preprocess import crop_face_yolo
 
 # parents[3] = raiz do repo (src/video/v3_face/infer.py → src/video → src → raiz)
 MODEL_DIR = Path(__file__).resolve().parents[3] / "models" / "v3_face"
@@ -69,24 +70,13 @@ def _get_yolo():
 
 
 def _crop_face(frame: np.ndarray, conf: float = 0.25) -> np.ndarray | None:
-    """Recorte de rosto por proxy. Deve espelhar
-    scripts/extract_face_frames.py::crop_face_yolo — treino e inferência não podem divergir.
+    """Recorte de rosto — delega ao módulo compartilhado com a extração do T104.
+
+    Não reimplementar aqui: é a MESMA função que gerou os frames de treino. Uma cópia
+    local sairia de sincronia sem ninguém perceber, e o modelo passaria a receber em
+    produção um enquadramento que nunca viu treinar.
     """
-    result = _get_yolo()(frame, verbose=False, conf=conf)[0]
-    if result.boxes is None or len(result.boxes) == 0:
-        return None
-    boxes = result.boxes.xyxy.cpu().numpy()
-    areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
-    x1, y1, x2, y2 = boxes[int(areas.argmax())]
-    w, h = x2 - x1, y2 - y1
-    face_y2 = y1 + h * UPPER_BODY_RATIO
-    x1m = max(0, int(x1 - CROP_MARGIN * w))
-    x2m = min(frame.shape[1], int(x2 + CROP_MARGIN * w))
-    y1m = max(0, int(y1 - CROP_MARGIN * h))
-    y2m = min(frame.shape[0], int(face_y2 + CROP_MARGIN * h * 0.2))
-    if x2m - x1m < 20 or y2m - y1m < 20:
-        return None
-    return frame[y1m:y2m, x1m:x2m]
+    return crop_face_yolo(frame, _get_yolo(), conf=conf, margin=CROP_MARGIN)
 
 
 def _sample_frames(video_path: Path) -> list[np.ndarray]:
