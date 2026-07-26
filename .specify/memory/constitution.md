@@ -29,6 +29,29 @@ Qualquer pessoa (e qualquer IA) deve conseguir retomar o trabalho lendo, nesta o
 ### VI. Mudança consciente
 Se a implementação divergir da spec, **atualize a spec primeiro** (ou abra uma nova change), depois o código. Nunca deixe o código como verdade silenciosa.
 
+### VII. Explicar como professor, não como especialista
+Este é um trabalho acadêmico feito por cinco pessoas com formações diferentes: **ninguém deve
+precisar aceitar um resultado que não entendeu.** Quem entrega — pessoa ou IA — tem a obrigação
+de tornar o próprio trabalho compreensível, e a régua é o integrante que não trabalhou naquela
+frente.
+
+Na prática, ao relatar qualquer decisão técnica, resultado de treino ou métrica:
+
+- **Defina o termo na primeira vez que ele aparecer** (métricas, arquiteturas, jargão de ML,
+  nomes de módulo). Nota de rodapé, glossário ou parênteses — mas defina.
+- **Diga o que o número significa em português**, não só o valor: "acerta ~70% dos rostos que
+  nunca viu" vale mais que "F1 macro 0,6986".
+- **Explique o porquê da escolha**, não só o quê: por que esta métrica, por que este dataset,
+  por que este ponto de corte.
+- **Separe o que é fato medido do que é interpretação ou recomendação.**
+- **Declare limitações junto com o resultado**, nunca depois de perguntado — especialmente
+  dados de proxy, amostras pequenas e desvios do plano.
+- **Se o leitor precisa decidir algo**, apresente as opções com custo e ganho esperado de cada
+  uma, e uma recomendação explícita.
+
+Explicação boa é entregável, não cortesia. Resultado que o time não consegue explicar na
+apresentação é resultado que não pode ser usado.
+
 ## Padrões técnicos (baseline)
 
 | Área | Decisão |
