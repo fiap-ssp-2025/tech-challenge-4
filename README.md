@@ -1,8 +1,54 @@
-# Tech Challenge 4 — Despacho Inteligente Áudio–Vídeo (190/193)
+# Tech Challenge 4 — Triagem Multimodal em Consultas (Saúde da Mulher)
 
-Pipeline de apoio ao despacho: a **ligação 190/193** dispara STT + PLN + emoção de voz; o **vídeo da região** (sob demanda) corrobora com tracks, postura e violência. A fusão (local/tempo + escore) gera uma nota priorizada — **decisão final humana**.
+Pipeline de apoio à triagem: a **gravação da consulta** (presencial ou teleconsulta, PT-BR) alimenta áudio (relato + sofrimento na voz) e vídeo (desconforto facial, postura defensiva, presença de acompanhante). Por virem da mesma sessão, a fusão gera um **alerta de triagem à equipe especializada** — **decisão final humana**.
 
-Fonte da verdade: `AGENTS.md` + `specs/001-despacho-audio-video/`.
+Fonte da verdade: `AGENTS.md` + `specs/002-triagem-consulta/`.
+
+## O que é esse projeto?
+
+A gravação de uma consulta (presencial ou teleconsulta) alimenta dois ramos — áudio e vídeo — que,
+por virem da **mesma sessão**, são fundidos por `session_id` e geram uma **nota de triagem** para a
+equipe especializada. A decisão final é sempre humana.
+
+```mermaid
+flowchart LR
+    S(["Gravação da consulta<br/>áudio + vídeo, mesma sessão"])
+    subgraph AUDIO["Ramo de áudio"]
+        A1["A1 · Transcrição (STT)<br/>Azure + fallback offline — P3"]
+        A2["A2 · PLN por regras<br/>tipo de relato, local, tempo — P3"]
+        A3["A3 · Sofrimento na voz<br/>wav2vec2 PT-BR — P2"]
+    end
+    subgraph VIDEO["Ramo de vídeo"]
+        V1["V1 · Pessoas e tracks<br/>YOLOv8 + ByteTrack — P5"]
+        V2["V2 · Postura defensiva<br/>YOLOv8-pose + GradientBoosting — P5"]
+        V3["V3 · Desconforto facial<br/>ViT pré-treinado em FER — P4"]
+    end
+    CD["C/D · Fusão por sessão<br/>escore ponderado — P1"]
+    OUT(["Nota de triagem<br/>decisão final humana"])
+    S --> A1 --> A2 --> CD
+    S --> A3 --> CD
+    S --> V1 --> CD
+    S --> V2 --> CD
+    S --> V3 --> CD
+    CD --> OUT
+    classDef real fill:#a7d7b8,stroke:#2e7d4f,color:#0f2e1c
+    classDef neutro fill:#dde3ea,stroke:#7c8794,color:#242a31
+    class A1,A2,A3,V1,V2,V3,CD real
+    class S,OUT neutro
+```
+
+Convenção de nomes: **A\*** = módulos de áudio, **V\*** = módulos de vídeo, **C/D** = correlação e
+decisão (a fusão). Cada módulo devolve um número entre 0 e 1 (ou um JSON pequeno), e a fusão os
+combina numa única nota. **Os seis módulos rodam reais** — os stubs continuam como rede de
+segurança, acionados por `src/resolve.py` quando falta pacote, artefato treinado ou credencial.
+
+Glossário rápido: **STT** (*speech-to-text*) é a transcrição automática da fala; **PLN** é o
+processamento de linguagem natural que extrai campos estruturados do texto; **FER** (*facial
+expression recognition*) é reconhecimento de expressão facial; **YOLOv8** detecta pessoas em vídeo e
+**ByteTrack** as segue quadro a quadro, dando um ID estável a cada uma.
+
+Os contratos JSON de cada módulo estão em `src/contracts/` e são **imutáveis a partir da Etapa 2** —
+é o que permite cada P trabalhar em paralelo sem quebrar o vizinho.
 
 ## Instalação (reproduzível)
 
@@ -15,15 +61,19 @@ cp .env.example .env   # preencha AZURE_SPEECH_KEY / AZURE_SPEECH_REGION (P3)
 
 ## Pipeline ponta a ponta
 
+O que queremos mostrar: **do áudio e do vídeo de uma consulta até o alerta de triagem**, sem passos manuais no meio. Um único programa (`src.run_event` — o “runner”) recebe os dois arquivos, passa pelos módulos de áudio e de vídeo e imprime a nota de triagem.
+
+Para provar que o fluxo inteiro sobe num clone limpo — mesmo sem gravação real de consulta — use arquivos-fantoche:
+
 ```bash
 uv run python -m src.run_event --audio dummy.wav --video dummy.mp4 --make-dummies
 ```
 
-Se `dummy.wav` / `dummy.mp4` não existirem, o runner gera silêncio + frame preto (~2 s).
-No início da execução ele imprime o mapa `[resolve]` (qual módulo rodou real e qual rodou stub,
-com o motivo) e, ao final, o tempo de inferência de cada módulo em ms.
+`dummy.wav` e `dummy.mp4` não são consultas de verdade: com `--make-dummies`, o runner cria sozinho ~2 s de **silêncio** (áudio) e um **vídeo preto** (uma tela vazia). Serve só para exercitar o caminho ponta a ponta. Com gravação real, troque os caminhos pelos seus `.wav` / `.mp4`.
 
-Testes:
+No início a saída lista o mapa `[resolve]` (qual módulo rodou de verdade e qual usou stub, e por quê); no fim, o tempo de cada módulo em ms.
+
+Testes automatizados:
 
 ```bash
 uv run pytest
@@ -126,7 +176,7 @@ specs/002-triagem-consulta/
 
 Fluxo: `constitution → specify → clarify → plan → tasks → implement`.
 
-Feature ativa: **001-despacho-audio-video** (`in-progress`). O exemplo `hello_sdd` / `specs/000-hello-sdd` permanece até a Etapa 5.
+Feature ativa: **002-triagem-consulta** (`in-progress`). A `001-despacho-audio-video` ficou `superseded` (reancoragem hospitalar). O exemplo `hello_sdd` / `specs/000-hello-sdd` permanece até a Etapa 5.
 
 ```bash
 uv run hello-sdd Ada   # exemplo legado
