@@ -46,9 +46,13 @@
     **`pytest` 68 passed, 0 skipped**, incluindo `test_crop_matches_training_extractor`, que
     compara o recorte do `infer` com o do script de extração (guarda contra treino×produção
     divergirem em silêncio). E2E: os **6 módulos resolvem para real**; V3 em 152 ms.
-  - **Pendente P4:** publicar `models/v3_face/` (343 MB) em `fiap-ssp-2025/tc4-v3-desconforto-facial`
-    — `scripts/download_v3_model.py` já aponta para lá. Declarar no RNF-06 que o rótulo é
-    **proxy de expressão atuada**, não desconforto clínico anotado.
+  - **Publicado:** pesos em `fiap-ssp-2025/tc4-v3-desconforto-facial` (Hugging Face, **privado**
+    sob a org do time; CC BY-NC-SA 4.0 herdada do RAVDESS), com model card declarando o proxy e a
+    margem estreita. `scripts/t112/publish_v3_model.py` reproduz a publicação.
+    **Verificado:** com `models/v3_face/` removido e restaurado só por `download_v3_model.py`,
+    `resolve` mostra `v3_face → real` e `pytest` 68 passed, 0 skipped.
+  - **Pendente RNF-06:** declarar no relatório que o rótulo é **proxy de expressão atuada**, não
+    desconforto clínico anotado por humano.
 - [x] T113 P5: cabeça de postura + V1 — contratos respeitados
   - **Verificado:** V1 YOLOv8n+ByteTrack devolve `{n_pessoas, tracks[{id, n_frames, bbox_media}]}`; V2 GradientBoosting F1 macro=0.688 (split ator 8, aceite: reportar); `pytest` 20/20 verde
 - [x] T114 P1: plugar `infer.py` reais mantendo contrato
