@@ -39,7 +39,12 @@ Eventos → {session_id, modality, timestamp}
 ## Fusão
 
 - `same_session`: `session_id` igual **e** |Δt| ≤ 10 min ⇒ `corroborado`.
-- Pesos (dict único em `fusion/scoring`, soma 1.00): relato 0.25 · sofrimento 0.25 · desconforto_facial 0.20 · postura 0.20 · corroboração 0.10.
+- Pesos (dict único em `fusion/scoring`, soma 1.00): relato 0.28 · sofrimento 0.28 · desconforto_facial 0.22 · postura 0.22.
+- **Corroboração não pesa no escore** (revisado em 26/07/2026). Na 002 áudio e vídeo vêm da mesma
+  consulta, então `corroborado` é verdadeiro por construção — como termo de escore era uma constante
+  somada a todo caso (72% de um escore de 0,138 no teste de simulação), sem discriminar nada. O flag
+  permanece no contrato C/D (RF-07) e na nota, como proveniência. Os 0,10 foram redistribuídos
+  proporcionalmente entre os quatro sinais medidos, preservando a razão herdada da 001.
 - Sinal do relato: `violencia_domestica → 1.0`, `sofrimento_emocional → 0.6`, `outro → 0.0` (documentado).
 - Compatibilidade: o caminho geográfico (haversine) permanece como utilitário legado; o primário é sessão.
 

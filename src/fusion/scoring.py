@@ -1,6 +1,14 @@
 """Weighted triage score for C/D fusion (feature 002 — consulta).
 
 Weights are documented rules (not learned). Sum = 1.00 — adjust only here.
+
+Por que a corroboração NÃO pesa no escore (mudança de 26/07/2026): na 002 áudio e
+vídeo vêm sempre da mesma consulta, então `corroborado` é verdadeiro por construção.
+Como termo de escore ele virava uma constante somada a todo caso — no teste da
+simulação respondia por 72% de um escore de 0,138, sem discriminar nada. O flag
+continua no contrato C/D (RF-07) e na nota, como informação de proveniência; o que
+saiu foi o peso. Os 0,10 foram redistribuídos proporcionalmente entre os quatro
+sinais medidos, preservando a razão 0,25/0,25/0,20/0,20 herdada da 001.
 """
 
 from __future__ import annotations
@@ -8,11 +16,10 @@ from __future__ import annotations
 from typing import Any
 
 SCORE_WEIGHTS: dict[str, float] = {
-    "relato": 0.25,  # indicador extraído da fala (A2)
-    "sofrimento": 0.25,  # voz (A3)
-    "desconforto_facial": 0.20,  # face (V3)
-    "postura": 0.20,  # corpo (V2)
-    "corroboracao": 0.10,  # mesma sessão dentro da janela
+    "relato": 0.28,  # indicador extraído da fala (A2)
+    "sofrimento": 0.28,  # voz (A3)
+    "desconforto_facial": 0.22,  # face (V3)
+    "postura": 0.22,  # corpo (V2)
 }
 
 # Sinal normalizado do relato (documentado na spec 002):
@@ -38,10 +45,14 @@ def compute_score(
     sofrimento: float,
     desconforto_facial: float,
     postura_defensiva: float,
-    corroborado: bool,
+    corroborado: bool = True,
     weights: dict[str, float] | None = None,
 ) -> float:
-    """Weighted sum of normalized signals in [0, 1]."""
+    """Weighted sum of normalized signals in [0, 1].
+
+    `corroborado` é aceito para compatibilidade e continua no contrato C/D, mas não
+    entra no escore — ver o cabeçalho do módulo.
+    """
     w = weights or SCORE_WEIGHTS
     signals = {
         "relato": relato_signal(tipo_relato),
@@ -50,7 +61,7 @@ def compute_score(
         "postura": _clip01(postura_defensiva),
         "corroboracao": 1.0 if corroborado else 0.0,
     }
-    total = sum(w[k] * signals[k] for k in w)
+    total = sum(weight * signals[k] for k, weight in w.items())
     return _clip01(total)
 
 
