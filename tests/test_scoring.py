@@ -7,12 +7,27 @@ from src.fusion.scoring import SCORE_WEIGHTS, compute_score
 def test_weights_sum_to_one():
     assert abs(sum(SCORE_WEIGHTS.values()) - 1.0) < 1e-9
     assert SCORE_WEIGHTS == {
-        "relato": 0.25,
-        "sofrimento": 0.25,
-        "desconforto_facial": 0.20,
-        "postura": 0.20,
-        "corroboracao": 0.10,
+        "relato": 0.28,
+        "sofrimento": 0.28,
+        "desconforto_facial": 0.22,
+        "postura": 0.22,
     }
+
+
+def test_corroboracao_nao_altera_o_escore():
+    """Na 002 `corroborado` é sempre verdadeiro; se pesasse, seria constante somada.
+
+    Guarda a decisão de 26/07: o flag segue no contrato, mas fora do escore. Se
+    alguém reintroduzir o peso, este teste quebra.
+    """
+    args = dict(
+        tipo_relato="sofrimento_emocional",
+        sofrimento=0.4,
+        desconforto_facial=0.3,
+        postura_defensiva=0.2,
+    )
+    assert compute_score(**args, corroborado=True) == compute_score(**args, corroborado=False)
+    assert "corroboracao" not in SCORE_WEIGHTS
 
 
 def test_score_and_report():

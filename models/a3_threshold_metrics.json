@@ -1,7 +1,7 @@
 {
   "threshold_val_selected": 0.17,
-  "auc_val": 0.9249,
-  "auc_test": 0.8439,
+  "auc_val": 0.9229,
+  "auc_test": 0.8456,
   "f1_macro_test": {
     "default_0.50": 0.7171,
     "val_calibrado_0.17": 0.7896

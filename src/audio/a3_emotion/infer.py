@@ -49,7 +49,7 @@ def infer(path: str | Path) -> A3Result:
         y = y[:max_samples]
 
     # The model was fine-tuned on clips capped at WINDOW_S seconds; longer audio
-    # is scored in windows of that size and averaged, never fed in one pass.
+    # is scored in windows of that size, never fed in one pass.
     window = int(TARGET_SR * WINDOW_S)
     chunks = [y[i : i + window] for i in range(0, len(y), window)] or [y]
     if len(chunks) > 1 and len(chunks[-1]) < int(0.5 * TARGET_SR):
@@ -61,7 +61,12 @@ def infer(path: str | Path) -> A3Result:
             inputs = feature_extractor(chunk, sampling_rate=TARGET_SR, return_tensors="pt")
             logits = model(**inputs).logits
             scores.append(float(torch.softmax(logits, dim=-1)[0][NON_NEUTRAL_ID]))
-    score = sum(scores) / len(scores)
+
+    # MÁXIMO, não média: sofrimento é um evento, não um estado médio da gravação.
+    # Numa consulta longa o sinal costuma ser um trecho curto e agudo — a média o
+    # dilui no resto da fala (e no locutor neutro que também aparece no áudio).
+    # Triagem prefere errar sinalizando: perder o pico é o erro caro aqui.
+    score = max(scores)
 
     return validate_a3({"sofrimento": score})
 
