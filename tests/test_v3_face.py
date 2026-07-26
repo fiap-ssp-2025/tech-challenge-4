@@ -62,14 +62,17 @@ def test_video_without_face_scores_zero(tmp_path: Path):
     assert result["desconforto_facial"] == 0.0
 
 
-def test_crop_matches_training_extractor():
-    """Guarda contra o recorte do infer divergir do que gerou os dados do T104.
+def test_infer_and_extraction_share_one_crop_implementation():
+    """Extração (T104) e inferência (T112) têm de usar a MESMA função de recorte.
 
-    Se este teste quebrar, o modelo passa a receber em produção um enquadramento
-    diferente do que viu no treino — degradação silenciosa, sem erro nenhum.
+    Antes eram duas cópias e um teste comparava as saídas; agora há uma só, em
+    `src.video.v3_face.preprocess`. Este teste guarda a propriedade na origem: se
+    alguém reintroduzir uma cópia local, o `is` falha — não dependemos de a
+    divergência aparecer num quadro de exemplo.
     """
     import importlib.util
 
+    from src.video.v3_face import preprocess
     from src.video.v3_face import infer as v3
 
     root = Path(__file__).resolve().parents[1]
@@ -79,14 +82,5 @@ def test_crop_matches_training_extractor():
     extract = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(extract)
 
-    rng = np.random.default_rng(42)
-    frame = rng.integers(0, 255, (360, 480, 3), dtype=np.uint8)
-
-    mine = v3._crop_face(frame, conf=0.25)
-    theirs = extract.crop_face_yolo(frame, v3._get_yolo(), conf=0.25, margin=v3.CROP_MARGIN)
-
-    if mine is None or theirs is None:
-        assert mine is None and theirs is None, "as duas implementações têm de concordar"
-    else:
-        assert mine.shape == theirs.shape
-        assert np.array_equal(mine, theirs)
+    assert extract.crop_face_yolo is preprocess.crop_face_yolo
+    assert v3.crop_face_yolo is preprocess.crop_face_yolo
