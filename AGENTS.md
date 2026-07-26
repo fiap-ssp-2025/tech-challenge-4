@@ -9,11 +9,13 @@ Este repositório usa **Spec-Driven Development (SDD)**. A fonte da verdade é a
 ## Antes de qualquer mudança de código
 
 1. Leia `.specify/memory/constitution.md`.
-2. Identifique a feature ativa em `specs/` (status `ready` ou `in-progress`).
+2. Identifique a feature ativa em `specs/` (status `ready` ou `in-progress`). Ignore `superseded`, `done` e `draft`.
 3. Leia `spec.md`, `plan.md` e `tasks.md` dessa feature.
 4. Só então altere código em `src/` / `tests/`.
 
 Se não houver feature ativa e o usuário pedir implementação: **crie a spec primeiro** (fluxo specify → plan → tasks).
+
+Hoje: feature ativa = `specs/002-triagem-consulta/` (`in-progress`). A `001-despacho-audio-video` está `superseded` (arquivo histórico — não implementar).
 
 ## Fluxo obrigatório
 
@@ -61,4 +63,4 @@ Em outras IAs, peça explicitamente a mesma fase (ex.: "siga o fluxo specify des
 
 ## Escopo do exemplo
 
-`specs/000-hello-sdd/` + `src/` são o exemplo funcional mínimo. Novas features começam em `001-...`.
+`specs/000-hello-sdd/` é o exemplo funcional mínimo (legado). Features de produto usam o próximo `NNN` livre em `specs/` (após `002`).

@@ -8,7 +8,7 @@ alwaysApply: true
 Antes de escrever ou alterar código de feature:
 
 1. Ler `.specify/memory/constitution.md` e `AGENTS.md`
-2. Usar a feature ativa em `specs/` (`ready` / `in-progress`)
+2. Usar a feature ativa em `specs/` (`ready` / `in-progress`; hoje: `002-triagem-consulta`). Ignorar `superseded`.
 3. Seguir `tasks.md`; marcar `[x]` só após verificar
 
 Fluxo: **specify → clarify → plan → tasks → implement**.

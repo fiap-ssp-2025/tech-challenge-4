@@ -14,7 +14,8 @@ Use os templates em `.specify/templates/`.
 
 ## Status sugeridos
 
-`draft` → `ready` → `in-progress` → `done`
+`draft` → `ready` → `in-progress` → `done`  
+(`superseded` = arquivada; não é feature ativa — não implementar.)
 
 ## Em andamento
 
@@ -24,4 +25,4 @@ Use os templates em `.specify/templates/`.
 | 001 | despacho-audio-video | superseded |
 | 002 | triagem-consulta | in-progress |
 
-Ao criar uma feature nova, adicione uma linha nesta tabela.
+Feature ativa: **002-triagem-consulta**. Ao criar uma feature nova, adicione uma linha nesta tabela.
