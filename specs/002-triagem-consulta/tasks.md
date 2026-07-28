@@ -43,7 +43,7 @@
     **neutral**", mas a linha 76 monta a base com "neutro ← {neutral, **calm**}". O experimento
     mostra que manter `calm` é melhor ⇒ **alinhar a linha 51 à prática** (P1).
   - **Integração (P1):** `models/v3_face/` exportado como diretório auto-contido
-    (`scripts/t112/export_v3_model.py`) — carrega offline, sem baixar o backbone; `infer.py`
+    (formato `save_pretrained`) — carrega offline, sem baixar o backbone; `infer.py`
     real amostra até 12 frames, aplica **o mesmo recorte YOLOv8 do T104** e devolve a média
     (mesma agregação que produziu o 0,7108); `resolve.py` declara `packages`/`artifacts`;
     `preprocess.json` versiona recorte e normalização junto do peso.

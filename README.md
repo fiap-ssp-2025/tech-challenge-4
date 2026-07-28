@@ -145,9 +145,9 @@ uv run python scripts/train_v2_posture.py
 uv run python scripts/train_a3_emotion.py
 uv run python scripts/eval_a3_threshold.py
 
-# V3 — GPU, ~40 min
-scripts/t112/run_t112_r3.sh
-uv run python scripts/t112/export_v3_model.py
+# V3 — GPU, ~40 min (varredura fatorial 2x2; ver docs/relatorio-tecnico.md §5.6)
+uv run python scripts/t112/train_t112_fer.py --data-root data/video_consulta --out results --sweep v3
+uv run python scripts/t112/eval_t112_clip.py --ckpt results/v3_fer_best.pt --data-root data/video_consulta
 ```
 
 Eventos sintéticos de fusão:
