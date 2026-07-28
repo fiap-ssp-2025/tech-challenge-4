@@ -70,7 +70,7 @@ Eventos → {session_id, modality, timestamp}
 - Fonte CORAA SER v1.0: [rmarcacini/ser-coraa-pt-br](https://github.com/rmarcacini/ser-coraa-pt-br) (Drive público do shared-task).
 - Scripts: `scripts/download_coraa.py` → `data/audio_ptbr/raw/`; `scripts/preprocess_audio.py` → 8 kHz mono + `labels.csv` (vocabulário `{neutral, non_neutral}`, split por locutor/gravação C-ORAL).
 - Dep. extra: `gdown` (download dos zips do Google Drive).
-- VERBO: solicitação manual — texto em `docs/verbo-solicitacao.md` (não automatizar).
+- VERBO: solicitação manual por e-mail (não automatizar). O corpus não chegou a tempo; o núcleo do A3 fecha com o CORAA.
 - Verificação: `scripts/verify_audio_dataset.py`.
 
 ### Vídeo — face (T104) — detalhes operacionais
