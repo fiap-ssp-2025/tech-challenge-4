@@ -78,19 +78,12 @@ O profissional de saúde dispõe de poucos minutos por atendimento e nem sempre 
 específica para reconhecer os sinais. A literatura brasileira documenta esse despreparo com dados
 quantitativos: em amostra de profissionais de saúde, 60% declararam não ter recebido, durante a
 formação, conteúdo sobre como lidar com situações de violência, e 56,7% relataram não dispor de
-capacitação oferecida pela instituição em que atuam.[^1] Pesquisa qualitativa conduzida na Atenção
-Primária descreve a consequência dessa lacuna: embora reconheçam a violência como parte de seu
-papel profissional, os trabalhadores relatam despreparo para dar seguimento aos casos, o que leva o
-problema a ser invisibilizado ou medicalizado, tratado com anti-inflamatórios e benzodiazepínicos,
-em vez de abordado de forma integral.[^2]
-
-[^1]: FUSQUINE, R. S.; SOUZA, Y. A.; CHAGAS, A. C. F. Conhecimentos e condutas dos profissionais de
-saúde sobre a violência contra a mulher. *Revista Psicologia e Saúde*, v. 13, n. 1, artigo 09,
-2021. DOI: 10.20435/pssa.v13i1.1010.
-
-[^2]: MACHADO, D. F.; CASTANHEIRA, E. R. L.; ALMEIDA, M. A. S. de. A violência contra a mulher por
-parceiro íntimo nos serviços de Atenção Primária: da invisibilidade à medicalização. *Interface -
-Comunicação, Saúde, Educação*, v. 29, 2025. DOI: 10.1590/interface.240275.
+capacitação oferecida pela instituição em que atuam (FUSQUINE; SOUZA; CHAGAS, 2021). Pesquisa
+qualitativa conduzida na Atenção Primária descreve a consequência dessa lacuna: embora reconheçam a
+violência como parte de seu papel profissional, os trabalhadores relatam despreparo para dar
+seguimento aos casos, o que leva o problema a ser invisibilizado ou medicalizado, tratado com
+anti-inflamatórios e benzodiazepínicos, em vez de abordado de forma integral (MACHADO;
+CASTANHEIRA; ALMEIDA, 2025).
 
 A hipótese de trabalho é que sinais de sofrimento distribuídos em canais distintos (o conteúdo do
 relato, a prosódia da fala, a expressão facial e a postura corporal) são individualmente fracos,
@@ -486,3 +479,43 @@ O sistema não está pronto para uso real, pelas razões expostas na Seção 8. 
 objetivo a que se propôs: demonstrar que sinais fracos e distribuídos em canais distintos, tratados
 com rigor metodológico e com declaração explícita de limites, podem apoiar a atenção do profissional
 de saúde sem substituí-la.
+
+---
+
+## Referências
+
+FUSQUINE, R. S.; SOUZA, Y. A.; CHAGAS, A. C. F. Conhecimentos e condutas dos profissionais de saúde
+sobre a violência contra a mulher. *Revista Psicologia e Saúde*, v. 13, n. 1, artigo 09, 2021.
+DOI: 10.20435/pssa.v13i1.1010.
+
+MACHADO, D. F.; CASTANHEIRA, E. R. L.; ALMEIDA, M. A. S. de. A violência contra a mulher por
+parceiro íntimo nos serviços de Atenção Primária: da invisibilidade à medicalização. *Interface -
+Comunicação, Saúde, Educação*, v. 29, 2025. DOI: 10.1590/interface.240275.
+
+### Conjuntos de dados
+
+CORAA SER v1. *Speech Emotion Recognition corpus para português brasileiro*. Disponível em:
+https://github.com/rmarcacini/ser-coraa-pt-br.
+
+LIVINGSTONE, S. R.; RUSSO, F. A. The Ryerson Audio-Visual Database of Emotional Speech and Song
+(RAVDESS). *PLoS ONE*, v. 13, n. 5, e0196391, 2018. DOI: 10.1371/journal.pone.0196391.
+
+CAO, H.; COOPER, D. G.; KEUTMANN, M. K.; GUR, R. C.; NENKOVA, A.; VERMA, R. CREMA-D: Crowd-sourced
+Emotional Multimodal Actors Dataset. *IEEE Transactions on Affective Computing*, v. 5, n. 4,
+p. 377-390, 2014. DOI: 10.1109/TAFFC.2014.2336244.
+
+### Modelos e bibliotecas
+
+BAEVSKI, A.; ZHOU, H.; MOHAMED, A.; AULI, M. wav2vec 2.0: A Framework for Self-Supervised Learning
+of Speech Representations. *Advances in Neural Information Processing Systems*, v. 33, 2020.
+
+DOSOVITSKIY, A. et al. An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale.
+*International Conference on Learning Representations*, 2021.
+
+ZHANG, Y. et al. ByteTrack: Multi-Object Tracking by Associating Every Detection Box. *European
+Conference on Computer Vision*, 2022.
+
+Ultralytics YOLOv8. Disponível em: https://github.com/ultralytics/ultralytics.
+
+Checkpoints utilizados: `jonatasgrosman/wav2vec2-large-xlsr-53-portuguese` (base do A3) e
+`trpakov/vit-face-expression` (base do V3), ambos disponíveis no Hugging Face Hub.
