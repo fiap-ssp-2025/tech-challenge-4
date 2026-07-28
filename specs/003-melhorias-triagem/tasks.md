@@ -32,6 +32,14 @@
     correto, mas **não há evidência de ganho de sensibilidade**. Falta testar numa consulta
     simulada de verdade (dois locutores, cenário da 002) antes de afirmar benefício.
 
+- [x] T210 P1: calibração de escala na fusão (RF-25/26/27)
+  - **Verificado:** `calibrate()` ancora o limiar de cada modelo em 0,5; limiares vindos de
+    `models/*.json` com teste de sincronia; `relato` fora da calibração; `calibrado=False`
+    reproduz o comportamento anterior para comparação. Efeito: pizza 0,055 → **0,120**
+    (A3 0,119 → 0,350); casos gerados praticamente inalterados. `pytest` 85 passed.
+  - **Refutado no caminho:** descasamento de banda 8 kHz × banda cheia não explica o escore
+    baixo do A3 — limitar a 4 kHz piora (0,119 → 0,014).
+
 ## Fechamento
 
 - [ ] T290 Atualizar `specs/README.md` (índice) e declarar a diarização no RNF-24

@@ -1,4 +1,4 @@
-# Plan: Melhorias de Triagem — separação de locutores
+# Plan: Melhorias de Triagem — separação de locutores e calibração de escala
 
 > Referência: `specs/003-melhorias-triagem/spec.md` · **Status:** in-progress
 
@@ -63,11 +63,47 @@ não necessariamente mais alto.
 - **Cache em processo:** memoiza por `(path, mtime)`, para uma segunda chamada na mesma execução
   não pagar a rede de novo.
 
+## Calibração de escala na fusão (RF-25)
+
+**O problema medido.** Cada modelo tem fronteira de decisão própria, escolhida na validação:
+A3 em **0,17**, V3 em **0,70**, V2 sem medida (fica em 0,50). A fusão somava os três como se
+todos decidissem em 0,5 — subestimando o A3 e superestimando o V3, nas duas direções ao mesmo
+tempo.
+
+Quanto isso custava, com número: no teste do CORAA, a mediana dos áudios **neutros** é 0,022 e o
+p90 é 0,096. O vídeo de simulação real pontuou **0,119** — acima de 90% dos neutros, ou seja,
+evidência moderada de sofrimento. A fusão lia isso como 0,119 numa escala de 0 a 1, praticamente
+nada. Na faixa 0,1–0,2 do conjunto de teste há 2 áudios neutros e 4 com sofrimento: um escore ali
+é ~6× mais provável de vir de voz sofrida.
+
+**A regra.** `calibrate(bruto, limiar)` comprime `[0, limiar]` em `[0, 0.5]` e estica
+`[limiar, 1]` em `[0.5, 1]`. Monotônica, preserva 0 e 1, e vira identidade quando o limiar é 0,5.
+
+**Onde ficam os limiares.** Constantes em `fusion/scoring.DECISION_THRESHOLDS`, com a fonte
+anotada; `test_limiares_batem_com_as_metricas` compara com `models/a3_threshold_metrics.json` e
+`models/v3_clip_metrics.json`. Recalibrar um modelo sem atualizar a constante quebra o teste.
+
+**Efeito medido nos três casos de demonstração:**
+
+| Caso | A3 bruto → calibrado | V3 bruto → calibrado | Escore antes | depois |
+|---|---|---|---|---|
+| Pizza (real, 190) | 0,119 → 0,350 | — | 0,055 | **0,120** |
+| Consulta-A (IA) | 0,024 → 0,071 | 0,950 → 0,917 | 0,637 | 0,642 |
+| Denúncia (IA) | 0,015 → 0,044 | 0,990 → 0,983 | 0,515 | 0,522 |
+
+O caso com voz humana real mais que dobra; os gerados quase não mudam. É o comportamento
+esperado de uma correção de escala — conserta o que estava distorcido e deixa o resto quieto.
+
+**Hipótese testada e refutada, para não voltar.** Suspeitamos que o A3 sofresse de descasamento
+de banda: o CORAA foi processado a 8 kHz (nada acima de 4 kHz) e os vídeos entram em banda cheia.
+Limitando o áudio de demonstração a 4 kHz para imitar o treino, o escore **piorou** (0,119 →
+0,014). Não é banda.
+
 ## Riscos
 
 | Risco | Resposta |
 |---|---|
-| Diarização erra o agrupamento e junta duas vozes | O máximo por locutor continua ≥ ao de hoje; pior caso é empatar com o comportamento atual |
+| Diarização erra o agrupamento e junta duas vozes | O escore pode ficar **menor** que o do áudio bruto (ver "Como a agregação fica" — não é monotônico). Aceito: o valor maior vinha de janela contaminada, que é o artefato a eliminar |
 | Chamada extra ao Azure encarece/atrasa | Tier F0 cobre; medir e reportar no `[tempo]` do runner |
 | Azure indisponível na hora da demo | RF-22 garante o caminho atual; ensaiar com `TC4_FORCE_STUBS=1` como plano B |
 | Mexer no módulo do P2 durante congelamento | Mudança aditiva: sem diarização, o comportamento é bit-a-bit o de hoje; testes cobrem os dois caminhos |

@@ -224,6 +224,9 @@ data/**/raw/**
 data/**/processed/**
 !data/**/processed/.gitkeep
 data/**/annotations/**
+# Vídeos de demonstração ficam fora do git (binários grandes); os resultados que eles
+# produziram estão registrados em specs/003-melhorias-triagem/tasks.md.
+data/demo/
 !data/**/annotations/.gitkeep
 runs/
 Ultralytics/
