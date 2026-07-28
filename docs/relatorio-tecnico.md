@@ -79,8 +79,21 @@ persistente, insônia, dor difusa, ansiedade. A mulher frequentemente não verba
 por medo, por vergonha, ou porque o agressor está na sala.
 
 O profissional de saúde tem poucos minutos por consulta e nem sempre formação específica para
-reconhecer os sinais. A literatura registra que profissionais relatam **falta de preparo** para
-abordar o tema.
+reconhecer os sinais. A literatura brasileira registra esse despreparo com números: numa amostra de
+profissionais de saúde, **60% declararam não ter recebido, na formação, conteúdo sobre como lidar
+com situações de violência**, e **56,7% relataram não ter capacitação oferecida pela instituição em
+que atuam**.[^1] Pesquisa qualitativa na Atenção Primária descreve a consequência: reconhecendo a
+violência como parte do seu papel, os profissionais ainda assim **se sentem despreparados para dar
+seguimento aos casos**, o que leva o problema a ser invisibilizado ou medicalizado — tratado com
+anti-inflamatórios e benzodiazepínicos — em vez de abordado de forma integral.[^2]
+
+[^1]: FUSQUINE, R. S.; SOUZA, Y. A.; CHAGAS, A. C. F. **Conhecimentos e condutas dos profissionais
+de saúde sobre a violência contra a mulher**. Revista Psicologia e Saúde, v. 13, n. 1, artigo 09,
+2021. DOI: 10.20435/pssa.v13i1.1010.
+
+[^2]: MACHADO, D. F.; CASTANHEIRA, E. R. L.; ALMEIDA, M. A. S. de. **A violência contra a mulher
+por parceiro íntimo nos serviços de Atenção Primária: da invisibilidade à medicalização**.
+Interface — Comunicação, Saúde, Educação, v. 29, 2025. DOI: 10.1590/interface.240275.
 
 **Nossa hipótese:** sinais de sofrimento distribuídos em canais diferentes — o que se diz, como se
 diz, o que o rosto mostra, como o corpo se posiciona — isoladamente são fracos, mas **combinados**
