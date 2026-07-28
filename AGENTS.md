@@ -63,4 +63,4 @@ Em outras IAs, peça explicitamente a mesma fase (ex.: "siga o fluxo specify des
 
 ## Escopo do exemplo
 
-`specs/000-hello-sdd/` é o exemplo funcional mínimo (legado). Features de produto usam o próximo `NNN` livre em `specs/` (após `002`).
+Features novas usam o próximo `NNN` livre em `specs/` (após `003`).

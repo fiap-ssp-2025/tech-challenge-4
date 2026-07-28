@@ -42,7 +42,9 @@
 
 ## Fechamento
 
-- [ ] T290 Atualizar `specs/README.md` (índice) e declarar a diarização no RNF-24
+- [x] T290 Atualizar `specs/README.md` (índice) e declarar a diarização no RNF-24
+  - **Verificado (27/07):** 003 registrada no índice; diarização e calibração de escala entram nas
+    ressalvas da ata do go/no-go (`docs/go-no-go-etapa3.md`), que alimenta o RNF-06 do relatório.
 - [ ] T291 Status `done` em `spec.md` / `plan.md` quando o A/B estiver registrado
 
 ## Notas de execução

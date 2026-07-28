@@ -7,7 +7,11 @@
   - **Verificado:** `pytest` verde; E2E com stubs roda com `session_id`
 - [x] T102 P2: CORAA 8 kHz + labels + split por locutor (igual T002/001); solicitar VERBO
   - **Verificado:** `labels.csv` 933 linhas = 933 wavs em `processed/`; `verify_audio_dataset.py` prova zero locutor cruzando splits + amostra 5× 8 kHz mono; `pytest` verde; e-mail VERBO em `docs/verbo-solicitacao.md` (envio manual)
-- [ ] T103 P3: Azure Speech F0 + fallback (igual T003/001); PLN com nova taxonomia
+- [x] T103 P3: Azure Speech F0 + fallback (igual T003/001); PLN com nova taxonomia
+  - **Verificado (27/07):** recurso Azure Speech criado (tier F0, `brazilsouth`), `.env` preenchido;
+    `transcrever_audio()` transcreveu áudio real do CORAA em PT-BR ("Quando eu descobri lá o São
+    Vicente, eu adorei") e 2min28s de consulta simulada, com reconhecimento contínuo. O A1 usa o
+    Azure como provedor primário e cai para faster-whisper offline se ele falhar.
 - [x] T104 P4: extrair frames faciais RAVDESS/CREMA-D (rosto via YOLOv8); labels de emoção pelo nome do arquivo; split por ator; notebook Colab
   - **Verificado:** RAVDESS+CREMA-D via mirror GitLab; após balanceamento `labels.csv` 20612 = 20612 jpgs; minority 0.40; zero ator cruzando splits; notebook `notebooks/t112_fer_colab.ipynb`. Adendo: `download_cremad.py` default = GitLab mirror; `balance_binary_labels` no extract.
 - [x] T105 P5: frames de corpo + CVAT (`defensiva`/`neutra`); sprint coletivo de anotação (~1h, todos)
@@ -68,8 +72,15 @@
     (`parents[4]` → `parents[3]`).
 
 ## Etapas 3–5 — herdadas da 001 (T020→T042) com dois ajustes
-- [ ] T120 Go/no-go Etapa 3 inclui V3-facial na ordem de socorro: **V3 > A3 > V2**
-- [ ] T121 Etapa 5 inclui: remover `hello_sdd`/`specs/000` e conferir declarações do RNF-06 no relatório
+- [x] T120 Go/no-go Etapa 3 inclui V3-facial na ordem de socorro: **V3 > A3 > V2**
+  - **Decisão: GO** (27/07) — ata em `docs/go-no-go-etapa3.md`. Metas: A3 0,7896 · V3 0,7108 ·
+    V2 0,6868 reportado. Aceitas com 5 ressalvas declaradas (margem estreita, rótulo por proxy,
+    A3/V2 sem validação no domínio, mídia sintética não avalia emoção, escore não é probabilidade).
+    A partir daqui **não se treina mais** — só bug bash, relatório e vídeo.
+- [x] T121 Etapa 5 inclui: remover `hello_sdd`/`specs/000` e conferir declarações do RNF-06 no relatório
+  - **Verificado (27/07):** `src/hello_sdd/`, `specs/000-hello-sdd/` e `tests/test_greet.py`
+    removidos; entry point e mapeamento saíram do `pyproject.toml`; README, AGENTS.md e
+    `specs/README.md` atualizados. Declarações do RNF-06 consolidadas na ata do go/no-go.
 
 ## Fechamento SDD
 - [ ] T190 Status `done` em spec/plan; specs/README atualizado; revisar código × spec

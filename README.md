@@ -84,13 +84,11 @@ A fonte da verdade deste repositório é a especificação em `specs/`, não o c
 constitution → specify → clarify → plan → tasks → implement
 ```
 
-Feature ativa: **002-triagem-consulta** (`in-progress`). A `001-despacho-audio-video` ficou
-`superseded` (reancoragem hospitalar). O exemplo `hello_sdd` / `specs/000-hello-sdd` permanece
-até a Etapa 5.
+Features: **002-triagem-consulta** (produto) e **003-melhorias-triagem** (separação de locutores e
+calibração de escala). A `001-despacho-audio-video` ficou `superseded` — reancoragem ao contexto
+hospitalar, mantida como registro de decisão.
 
-```bash
-uv run hello-sdd Ada   # exemplo legado
-```
+Decisão de go/no-go da Etapa 3: `docs/go-no-go-etapa3.md`.
 
 Instruções para agentes: `AGENTS.md`.
 

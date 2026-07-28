@@ -21,8 +21,8 @@ Use os templates em `.specify/templates/`.
 
 | NNN | Slug | Status |
 |-----|------|--------|
-| 000 | hello-sdd | done |
 | 001 | despacho-audio-video | superseded |
 | 002 | triagem-consulta | in-progress |
+| 003 | melhorias-triagem | in-progress |
 
 Feature ativa: **002-triagem-consulta**. Ao criar uma feature nova, adicione uma linha nesta tabela.
