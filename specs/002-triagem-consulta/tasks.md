@@ -52,7 +52,8 @@
     divergirem em silêncio). E2E: os **6 módulos resolvem para real**; V3 em 152 ms.
   - **Publicado:** pesos em `fiap-ssp-2025/tc4-v3-desconforto-facial` (Hugging Face, **privado**
     sob a org do time; CC BY-NC-SA 4.0 herdada do RAVDESS), com model card declarando o proxy e a
-    margem estreita. `scripts/t112/publish_v3_model.py` reproduz a publicação.
+    margem estreita. Publicação feita via API do Hugging Face (script de publicação não
+    versionado: exige token de escrita e não faz parte da entrega).
     **Verificado:** com `models/v3_face/` removido e restaurado só por `download_v3_model.py`,
     `resolve` mostra `v3_face → real` e `pytest` 68 passed, 0 skipped.
   - **Pendente RNF-06:** declarar no relatório que o rótulo é **proxy de expressão atuada**, não
