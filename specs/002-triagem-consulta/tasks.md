@@ -84,3 +84,6 @@
 
 ## Fechamento SDD
 - [ ] T190 Status `done` em spec/plan; specs/README atualizado; revisar código × spec
+  - **Relatório técnico (T031) escrito:** `docs/relatorio-tecnico.md` — 10 seções, ~3.000 palavras,
+    com as 5 declarações obrigatórias do RNF-06 e os resultados dos 4 casos de teste. Falta cada P
+    revisar a seção do seu módulo (5.1–5.7).

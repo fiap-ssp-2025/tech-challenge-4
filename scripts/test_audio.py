@@ -126,8 +126,9 @@ def analisar(path: Path, *, com_stt: bool, ref: dict) -> dict:
         from src.audio.a1_stt import infer as a1
         from src.audio.a2_nlp import infer as a2
 
-        texto = a1.infer(wav)
-        estrut = a2.infer(texto)
+        # A2 recebe o caminho (compatibilidade com o runner) + o texto do A1.
+        transcricao = a1.infer(wav)["transcricao"]
+        estrut = a2.infer(wav, transcricao=transcricao)
         print(f"\nA1 transcrição: {estrut['transcricao'][:300]}")
         print(f"A2 → tipo_relato={estrut['tipo_relato']} | local={estrut['local']!r} "
               f"| tempo={estrut['tempo']!r}")
