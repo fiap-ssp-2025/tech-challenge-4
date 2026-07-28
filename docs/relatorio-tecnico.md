@@ -2,8 +2,8 @@
 
 ## Triagem Multimodal em Consultas — Saúde da Mulher
 
-**Grupo:** P1 (integração e fusão) · P2 (emoção na voz) · P3 (STT e PLN) · P4 (expressão facial) · P5 (visão corporal)
-**Repositório:** `fiap-ssp-2025/tech-challenge-4` · **Data:** julho de 2026
+**Grupo:** Marcelo Arruda de Siqueira · Leonardo Barbosa Nogueira · Jose Flavio Neto · Pedro Matias dos Santos · Wellington Oliveira de Andrade
+**Repositório:** `fiap-ssp-2025/tech-challenge-4` · **Data:** 28 de julho de 2026
 
 ---
 
@@ -12,50 +12,7 @@
 Construímos um sistema de **apoio à triagem** que analisa a gravação de uma consulta de saúde da
 mulher e produz uma **nota indicativa de risco** para a equipe especializada. A gravação alimenta
 dois ramos — áudio e vídeo — processados por cinco modelos independentes cujas saídas são fundidas
-num escore único.
-
-A decisão final é **sempre humana**. O sistema sinaliza; não diagnostica, não classifica pessoas e
-não substitui julgamento clínico.
-
-**Estado da entrega:** os seis módulos do pipeline rodam com modelos reais, ponta a ponta, com 77
-testes automatizados verdes. As três metas de acurácia definidas no plano foram atingidas.
-
-| Módulo | Meta | Resultado |
-|---|---|---|
-| A3 — sofrimento na voz | F1 macro ≥ 0,75 | **0,7896** |
-| V3 — desconforto facial | F1 macro ≥ 0,70 | **0,7108** |
-| V2 — postura defensiva | reportar | **0,6868** |
-
-O resultado mais significativo não está na tabela: aplicado a uma **ocorrência real** de violência
-doméstica, o módulo de voz produziu escore **0,479** — acima de 97,4% dos áudios neutros do
-conjunto de referência. Voltaremos a isso na Seção 7, junto com o que ele revela sobre a diferença
-entre validar um modelo e validá-lo *no domínio de uso*.
-
----
-
-## 2. O problema
-
-Violência doméstica raramente chega ao sistema de saúde como denúncia. Chega como cefaleia
-persistente, insônia, dor difusa, ansiedade. A mulher frequentemente não verbaliza o que acontece —
-por medo, por vergonha, ou porque o agressor está na sala.
-
-O profissional de saúde tem poucos minutos por consulta e nem sempre formação específica para
-reconhecer os sinais. A literatura registra que profissionais relatam **falta de preparo** para
-abordar o tema.
-
-**Nossa hipótese:** sinais de sofrimento distribuídos em canais diferentes — o que se diz, como se
-diz, o que o rosto mostra, como o corpo se posiciona — isoladamente são fracos, mas **combinados**
-podem elevar a atenção da equipe para casos que passariam despercebidos.
-
-### O que este sistema não é
-
-- Não é diagnóstico nem prova.
-- Não identifica pessoas nem atribui papéis.
-- Não decide encaminhamento — apenas informa quem decide.
-
----
-
-## 3. Arquitetura
+num escore único, conforme a Figura 1.
 
 ```mermaid
 flowchart LR
@@ -80,19 +37,87 @@ flowchart LR
     CD --> OUT
 ```
 
+*Figura 1 — Visão geral do pipeline: da gravação da consulta à nota de triagem.*
+
+A decisão final é **sempre humana**. O sistema sinaliza; não diagnostica, não classifica pessoas e
+não substitui julgamento clínico.
+
+**Estado da entrega:** os seis módulos do pipeline rodam com modelos reais, ponta a ponta, com 77
+testes automatizados verdes. As três metas de acurácia definidas no plano foram atingidas.
+
+
+| Módulo                  | Meta            | Resultado  |
+| ----------------------- | --------------- | ---------- |
+| A3 — sofrimento na voz  | F1 macro ≥ 0,75 | **0,7896** |
+| V3 — desconforto facial | F1 macro ≥ 0,70 | **0,7108** |
+| V2 — postura defensiva  | reportar        | **0,6868** |
+
+
+O resultado mais significativo não está na tabela. Aplicado a uma **ocorrência real** de violência
+doméstica — uma ligação de emergência, não uma simulação —, o módulo de voz produziu escore
+**0,479**.
+
+Para dimensionar esse número: o escore de sofrimento varia de 0 a 1, e o ponto a partir do qual
+**este modelo passa a classificar uma voz como sofrida é 0,17** (limiar medido na validação, não
+arbitrado — ver Seção 5.3). O resultado, portanto, é quase **três vezes o limiar de decisão**. No
+conjunto de referência, ele fica acima de **97,4% dos áudios neutros** e de **60,9% dos áudios
+rotulados como sofrimento** — ou seja, não é apenas "positivo": está entre os casos mais intensos
+que o modelo já viu.
+
+O contraste importa: nas três gravações **simuladas** que testamos, o mesmo módulo ficou entre 0,02
+e 0,04 — abaixo do limiar, indistinguível de voz neutra. A Seção 7 detalha o que essa diferença
+revela sobre validar um modelo *no domínio de uso*.
+
+---
+
+
+
+## 2. O problema
+
+Violência doméstica raramente chega ao sistema de saúde como denúncia. Chega como cefaleia
+persistente, insônia, dor difusa, ansiedade. A mulher frequentemente não verbaliza o que acontece —
+por medo, por vergonha, ou porque o agressor está na sala.
+
+O profissional de saúde tem poucos minutos por consulta e nem sempre formação específica para
+reconhecer os sinais. A literatura registra que profissionais relatam **falta de preparo** para
+abordar o tema.
+
+**Nossa hipótese:** sinais de sofrimento distribuídos em canais diferentes — o que se diz, como se
+diz, o que o rosto mostra, como o corpo se posiciona — isoladamente são fracos, mas **combinados**
+podem elevar a atenção da equipe para casos que passariam despercebidos.
+
+### O que este sistema não é
+
+- Não é diagnóstico nem prova.
+- Não identifica pessoas nem atribui papéis.
+- Não decide encaminhamento — apenas informa quem decide.
+
+---
+
+
+
+## 3. Arquitetura
+
+O fluxo ponta a ponta está na Figura 1: a gravação alimenta os ramos de áudio (A1–A3) e de vídeo
+(V1–V3); as saídas convergem na fusão C/D, que emite a nota de triagem. As decisões abaixo
+explicam como essa estrutura foi construída para permitir trabalho em paralelo e degradação
+controlada.
+
 ### Decisão estruturante: contratos primeiro
 
 Antes de qualquer modelo existir, definimos o **formato exato de saída de cada módulo** e o
 congelamos. São contratos JSON validados em tempo de execução (`src/contracts/`):
 
-| Módulo | Contrato |
-|---|---|
-| A1/A2 | `{transcricao, tipo_relato ∈ {violencia_domestica, sofrimento_emocional, outro}, local, tempo}` |
-| A3 | `{sofrimento: 0..1}` |
-| V1 | `{n_pessoas, tracks: [{id, n_frames, bbox_media}]}` |
-| V2 | `{postura_defensiva: 0..1}` |
-| V3 | `{desconforto_facial: 0..1}` |
-| C/D | `{escore, corroborado, nota_ocorrencia}` |
+
+| Módulo | Contrato                                                                                        |
+| ------ | ----------------------------------------------------------------------------------------------- |
+| A1/A2  | `{transcricao, tipo_relato ∈ {violencia_domestica, sofrimento_emocional, outro}, local, tempo}` |
+| A3     | `{sofrimento: 0..1}`                                                                            |
+| V1     | `{n_pessoas, tracks: [{id, n_frames, bbox_media}]}`                                             |
+| V2     | `{postura_defensiva: 0..1}`                                                                     |
+| V3     | `{desconforto_facial: 0..1}`                                                                    |
+| C/D    | `{escore, corroborado, nota_ocorrencia}`                                                        |
+
 
 Isso permitiu que cinco pessoas trabalhassem em paralelo sem se bloquear: cada uma sabia
 exatamente o que receberia e o que deveria entregar, mesmo antes de o vizinho ter código.
@@ -113,14 +138,18 @@ entrega final, todos os seis resolvem para real.
 
 ---
 
+
+
 ## 4. Dados
 
-| Ramo | Fonte | Volume | Divisão |
-|---|---|---|---|
-| Áudio PT-BR | CORAA SER v1 | 933 áudios, 8 kHz mono | 666 / 166 / 101 — **por locutor** |
-| Vídeo — face | RAVDESS + CREMA-D | 20.612 frames faciais | 14.388 / 2.996 / 3.228 — **por ator** (80/17/18) |
-| Vídeo — postura | RAVDESS | 11.504 frames de corpo | **por ator** (8 atores) |
-| Fusão | Sintético por sessão | `events.jsonl` | — |
+
+| Ramo            | Fonte                | Volume                 | Divisão                                          |
+| --------------- | -------------------- | ---------------------- | ------------------------------------------------ |
+| Áudio PT-BR     | CORAA SER v1         | 933 áudios, 8 kHz mono | 666 / 166 / 101 — **por locutor**                |
+| Vídeo — face    | RAVDESS + CREMA-D    | 20.612 frames faciais  | 14.388 / 2.996 / 3.228 — **por ator** (80/17/18) |
+| Vídeo — postura | RAVDESS              | 11.504 frames de corpo | **por ator** (8 atores)                          |
+| Fusão           | Sintético por sessão | `events.jsonl`         | —                                                |
+
 
 **Divisão por pessoa, sempre.** Nenhum locutor ou ator aparece em treino e teste ao mesmo tempo.
 Sem essa precaução o modelo memoriza vozes e rostos, e a métrica sai inflada — mediria capacidade
@@ -129,9 +158,15 @@ de reconhecer indivíduos, não de reconhecer emoção. Há verificação automa
 
 ---
 
+
+
 ## 5. Módulos
 
-### 5.1 A1 — Transcrição · *P3*
+Cada bloco da Figura 1 corresponde a um módulo com contrato próprio. Abaixo, o que cada um faz
+e as escolhas técnicas relevantes.
+
+
+### 5.1 A1 — Transcrição
 
 Azure Speech como provedor primário (tier F0, região `brazilsouth`), com **faster-whisper offline**
 como alternativa automática. Reconhecimento contínuo em PT-BR.
@@ -139,7 +174,7 @@ como alternativa automática. Reconhecimento contínuo em PT-BR.
 O fallback não é enfeite: se a nuvem falhar durante a demonstração ou não houver rede, o módulo
 continua real. Validado com áudio do CORAA e com 2min28s de consulta simulada.
 
-### 5.2 A2 — PLN por regras · *P3*
+### 5.2 A2 — PLN por regras
 
 Extração determinística de `{tipo_relato, local, tempo}` a partir da transcrição, com 28 termos de
 violência, termos de sofrimento emocional, tratamento de negação e padrões de local e tempo.
@@ -148,16 +183,18 @@ Escolhemos regras em vez de modelo treinado por dois motivos: não há corpus ro
 clínico em PT-BR ao nosso alcance, e uma regra é auditável — o profissional pode ver exatamente
 qual palavra disparou a classificação. A Seção 8 discute o preço dessa escolha.
 
-### 5.3 A3 — Sofrimento na voz · *P2*
+### 5.3 A3 — Sofrimento na voz
 
 Fine-tune do `wav2vec2-large-xlsr-53-portuguese` sobre o CORAA, tarefa binária (neutro vs
 não-neutro), 8 épocas em CPU, com pesos de classe para o desbalanceamento de 3,9:1. Apenas os 4
 blocos superiores e a cabeça foram treinados — o codificador convolucional permaneceu congelado.
 
-| Ponto de operação | F1 macro (teste) |
-|---|---|
-| Limiar padrão 0,50 | 0,7171 |
-| **Limiar 0,17 calibrado na validação** | **0,7896** |
+
+| Ponto de operação                      | F1 macro (teste) |
+| -------------------------------------- | ---------------- |
+| Limiar padrão 0,50                     | 0,7171           |
+| **Limiar 0,17 calibrado na validação** | **0,7896**       |
+
 
 AUC 0,9229 (validação) e 0,8456 (teste).
 
@@ -171,13 +208,13 @@ sinalizar é o erro caro.
 não a média. Sofrimento é evento, não estado médio: numa gravação longa o sinal é um trecho curto
 que a média dilui.
 
-### 5.4 V1 — Pessoas e rastreamento · *P5*
+### 5.4 V1 — Pessoas e rastreamento
 
 YOLOv8n com ByteTrack, processando em modo `stream` para não acumular quadros em memória — sem
 isso, vídeos longos estouram a RAM. Devolve contagem de pessoas e trajetória de cada uma, o que
 alimenta a leitura de presença de acompanhante.
 
-### 5.5 V2 — Postura defensiva · *P5*
+### 5.5 V2 — Postura defensiva
 
 YOLOv8n-pose extrai 17 pontos-chave do corpo; sobre eles, 43 características geométricas
 (ângulos, distâncias normalizadas) alimentam um GradientBoosting. **F1 macro 0,6868**, divisão por
@@ -186,15 +223,17 @@ ator, semente 42.
 O critério de aceite era *reportar* o F1, não atingir um alvo — decisão consciente do grupo, dado
 que os rótulos são derivados por proxy (Seção 8).
 
-### 5.6 V3 — Desconforto facial · *P4*
+### 5.6 V3 — Desconforto facial
 
 Ponto de partida: `trpakov/vit-face-expression`, um Vision Transformer **já treinado em expressão
 facial**, reajustado para a tarefa binária desconforto vs neutro.
 
-| Unidade | F1 macro | AUC |
-|---|---|---|
-| Por frame | 0,7045 | 0,7811 |
+
+| Unidade                             | F1 macro   | AUC        |
+| ----------------------------------- | ---------- | ---------- |
+| Por frame                           | 0,7045     | 0,7811     |
 | **Por clipe** (unidade real de uso) | **0,7108** | **0,8076** |
+
 
 **Por que "por clipe".** O contrato do V3 recebe um vídeo e devolve um escore. Medir quadro a
 quadro responde "acertou este quadro?"; o que importa é "acertou esta gravação?". A inferência
@@ -204,22 +243,24 @@ promedia os frames do vídeo, e a métrica reflete exatamente essa agregação.
 o rótulo `calm` — mas em **quatro treinos cruzados**, para saber qual produziu o efeito:
 
 - **Trocar o backbone funcionou:** partir de uma rede que já lê expressões faciais, em vez de uma
-  treinada em objetos genéricos, elevou o AUC de 0,7605 para 0,8076.
-- **Remover `calm` piorou**, de forma consistente nas duas arquiteturas. Aqueles 1.152 frames são
-  exemplos negativos úteis — ensinam que um rosto relaxado *não* é desconforto.
+treinada em objetos genéricos, elevou o AUC de 0,7605 para 0,8076.
+- **Remover** `calm` **piorou**, de forma consistente nas duas arquiteturas. Aqueles 1.152 frames são
+exemplos negativos úteis — ensinam que um rosto relaxado *não* é desconforto.
 
 Sem o desenho cruzado, teríamos creditado todo o ganho à rede e removido o rótulo por engano.
 
-### 5.7 C/D — Fusão · *P1*
+### 5.7 C/D — Fusão
 
 Soma ponderada de sinais **calibrados**:
 
-| Sinal | Peso |
-|---|---|
-| Relato (A2) | 0,28 |
-| Sofrimento na voz (A3) | 0,28 |
+
+| Sinal                   | Peso |
+| ----------------------- | ---- |
+| Relato (A2)             | 0,28 |
+| Sofrimento na voz (A3)  | 0,28 |
 | Desconforto facial (V3) | 0,22 |
-| Postura defensiva (V2) | 0,22 |
+| Postura defensiva (V2)  | 0,22 |
+
 
 **Calibração de escala.** Cada modelo tem fronteira de decisão própria, medida na validação: o A3
 decide em 0,17, o V3 em 0,70. Somá-los como se ambos decidissem em 0,5 subestima o primeiro e
@@ -239,6 +280,8 @@ a todo caso — chegava a responder por 72% de um escore. O indicador permanece 
 informação de proveniência, mas não pesa.
 
 ---
+
+
 
 ## 6. Reprodutibilidade
 
@@ -262,25 +305,54 @@ Tempo de inferência medido numa consulta de 2min28s: A1 71 s, A3 82 s, V1 73 s,
 
 ---
 
+
+
 ## 7. Resultados ponta a ponta
 
-Quatro gravações, cobrindo material sintético, atuado e real:
+Quatro gravações, cobrindo material sintético, atuado e real. As três primeiras têm áudio e vídeo;
+a quarta é uma **ligação telefônica**, portanto só exercita o ramo de áudio — os travessões marcam
+módulos que não tinham entrada, não módulos que falharam. Todos os escores de voz e face abaixo são
+valores brutos dos modelos; o escore final já é calculado com a calibração da Seção 5.7.
 
-| Caso | Origem | Relato (A2) | Voz (A3) | Face (V3) | Postura (V2) | Escore |
-|---|---|---|---|---|---|---|
-| Consulta A | gerada por IA | `violencia_domestica` | 0,02 | 0,95 | 0,64 | **0,64** |
-| Denúncia | gerada por IA | `sofrimento_emocional` | 0,02 | 0,99 | 0,57 | **0,52** |
-| Consulta simulada | atuada | `violencia_domestica` | 0,04 | 1,00 | 0,08 | **0,53** |
-| **Ocorrência real** | **ligação real** | `outro` | **0,479** | — | — | — |
+
+| Caso                | Origem           | Relato (A2)            | Voz (A3)  | Face (V3) | Postura (V2) | Escore   |
+| ------------------- | ---------------- | ---------------------- | --------- | --------- | ------------ | -------- |
+| Consulta A          | gerada por IA    | `violencia_domestica`  | 0,02      | 0,95      | 0,64         | **0,64** |
+| Denúncia            | gerada por IA    | `sofrimento_emocional` | 0,02      | 0,99      | 0,57         | **0,52** |
+| Consulta simulada   | atuada           | `violencia_domestica`  | 0,04      | 1,00      | 0,08         | **0,53** |
+| **Ocorrência real** | **ligação real** | `outro`                | **0,479** | —         | —            | —        |
+
+
+
 
 ### O achado central
 
 Nas três primeiras gravações, o módulo de voz ficou em torno de 0,02–0,04, e chegamos a suspeitar
 de limitação do modelo. **A suspeita estava errada.**
 
-Aplicado a uma **ligação real** de violência doméstica, o A3 produziu **0,479** — acima de 97,4%
-dos áudios neutros e de 60,9% dos áudios com sofrimento do conjunto de referência, com três janelas
-de 6 s cruzando o limiar de decisão.
+Aplicado ao primeiro minuto de uma **ligação real** de violência doméstica (gravação telefônica,
+8 kHz, codec GSM), o A3 produziu **0,479**.
+
+A tabela abaixo situa esse valor na escala do próprio modelo. O limiar de decisão é **0,17** — ver
+Seção 5.3 —, e os percentis vêm do conjunto de teste do CORAA, com 78 áudios neutros e 23 com
+sofrimento, versionado em `models/a3_reference_scores.json`:
+
+| Referência | Escore |
+|---|---|
+| Mediana dos áudios **neutros** | 0,022 |
+| p90 dos áudios neutros | 0,096 |
+| **Limiar de decisão do modelo** | **0,17** |
+| Mediana dos áudios **com sofrimento** | 0,239 |
+| **Ocorrência real (este teste)** | **0,479** |
+| p90 dos áudios com sofrimento | 0,678 |
+
+O resultado é ~2,8× o limiar, supera a mediana da própria classe positiva, e fica acima de 97,4%
+dos neutros e de 60,9% dos casos de sofrimento da referência. Não é um positivo marginal.
+
+O perfil temporal reforça: das dez janelas de 6 s do primeiro minuto, **três cruzaram o limiar**,
+com picos de 0,479 aos 12 s e 0,434 aos 48 s. O sinal é episódico — concentrado nos momentos de
+maior tensão da ligação —, o que confirma a decisão de projeto de agregar por **máximo** e não por
+média (Seção 5.3).
 
 O que faltava não era ajuste de modelo: era **material do domínio**. Voz sintetizada por IA não
 aciona um modelo treinado em fala humana espontânea, e uma simulação encenada por não-atores
@@ -297,11 +369,13 @@ Na ligação real, a **diarização agrupou vítima e atendente como um único f
 pela compressão GSM da telefonia, que achata diferenças de timbre. Consequência concreta: o
 caminho com separação entregaria 0,102, contra 0,479 do áudio bruto.
 
-E o **A2 classificou como `outro`** apesar de a pessoa dizer "ele está querendo me matar" — o
+E o **A2 classificou como** `outro` apesar de a pessoa dizer "ele está querendo me matar" — o
 vocabulário cobre agressão e ameaça genérica, mas não ameaça de morte. A transcrição também sofreu
 com a qualidade telefônica.
 
 ---
+
+
 
 ## 8. Declarações obrigatórias
 
@@ -349,6 +423,8 @@ probabilidade seria erro grave num contexto clínico.
 
 ---
 
+
+
 ## 9. Limitações e trabalho futuro
 
 **Divulgação velada não é capturada.** Testamos o sistema com uma gravação em que a vítima sinaliza
@@ -374,6 +450,8 @@ próximo experimento indicado.
 numa paciente sentada — situação para a qual não foi treinado.
 
 ---
+
+
 
 ## 10. Conclusão
 
