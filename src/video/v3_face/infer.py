@@ -1,4 +1,4 @@
-"""V3 facial discomfort — ViT pre-treinado em FER, fine-tune do T112 (P4).
+"""V3 desconforto facial — ViT pré-treinado em FER, fine-tune do T112.
 
 O modelo pontua RECORTES DE ROSTO, não o quadro inteiro: a inferência precisa
 repetir o mesmo pré-processamento do treino (detecção YOLOv8 → recorte superior
@@ -50,7 +50,7 @@ def _get_model():
     if _model is None:
         if not MODEL_DIR.is_dir():
             raise FileNotFoundError(
-                f"V3 model not found: {MODEL_DIR}\n"
+                f"Modelo V3 não encontrado: {MODEL_DIR}\n"
                 "Run: uv run python scripts/download_v3_model.py"
             )
         from transformers import AutoModelForImageClassification
@@ -106,12 +106,12 @@ def _to_tensor(crop: np.ndarray):
 
 
 def infer(path: str | Path) -> V3Result:
-    """Estimate desconforto_facial [0..1] from a consultation video."""
+    """Estima desconforto_facial [0..1] a partir de um vídeo de consulta."""
     import torch
 
     video_path = Path(path)
     if not video_path.is_file():
-        raise FileNotFoundError(f"Video not found: {video_path}")
+        raise FileNotFoundError(f"Vídeo não encontrado: {video_path}")
 
     model = _get_model()
     positive = int(_get_cfg().get("positive_index", POSITIVE_INDEX))

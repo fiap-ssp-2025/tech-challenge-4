@@ -1,4 +1,4 @@
-"""Triage note generator (C/D) — support for the care team, not a verdict."""
+"""Gerador de nota de triagem (C/D) — apoio à equipe de cuidado, não um veredito."""
 
 from __future__ import annotations
 
@@ -51,7 +51,7 @@ def build_report(
     v3: dict[str, Any] | None = None,
     corroborado: bool = False,
 ) -> CDResult:
-    """Compose C/D contract from module outputs."""
+    """Monta o contrato C/D a partir das saídas dos módulos."""
     v2_safe = v2 or {"postura_defensiva": 0.0}
     v3_safe = v3 or {"desconforto_facial": 0.0}
     escore = score_from_modules(a12, a3, v2_safe, v3_safe, corroborado=corroborado)

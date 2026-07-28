@@ -1,19 +1,19 @@
-"""Module resolution: real `infer()` when available, stub otherwise — always logged.
+"""Resolução de módulos: `infer()` real quando disponível, stub caso contrário — sempre logado.
 
-The pipeline must survive the trainings landing one at a time (T110–T112), so no
-caller imports `src.stubs.*` directly. `get_module(name)` decides, per module:
+O pipeline precisa sobreviver aos treinos chegando um a um (T110–T112), então nenhum
+chamador importa `src.stubs.*` diretamente. `get_module(name)` decide, por módulo:
 
   1. TC4_FORCE_STUBS=1                       → stub (demo controlada)
-  2. python package missing                  → stub
-  3. artifact missing (weights / .pkl)       → stub
-  4. credential missing (.env)               → stub
-  5. real module fails to import             → stub
-  6. real module still re-exports the stub   → stub
-  7. otherwise                               → real
+  2. pacote Python ausente                   → stub
+  3. artefato ausente (pesos / .pkl)         → stub
+  4. credencial ausente (.env)               → stub
+  5. módulo real falha ao importar           → stub
+  6. módulo real ainda re-exporta o stub     → stub
+  7. caso contrário                          → real
 
-TC4_REQUIRE_REAL=v1_tracks,v2_pose turns a stub fallback into a hard error, so a
-future CI job can assert the real modules are wired. The two env vars are
-mutually exclusive.
+TC4_REQUIRE_REAL=v1_tracks,v2_pose transforma um fallback para stub em erro duro, para
+um job futuro de CI poder afirmar que os módulos reais estão ligados. As duas
+variáveis de ambiente são mutuamente exclusivas.
 """
 
 from __future__ import annotations
@@ -40,21 +40,21 @@ _TRUTHY = frozenset({"1", "true", "yes", "sim", "on"})
 
 
 class ModuleResolutionError(RuntimeError):
-    """Raised on an unknown module name or an unmet TC4_REQUIRE_REAL demand."""
+    """Levantada quando o nome do módulo é desconhecido ou a exigência de TC4_REQUIRE_REAL não é atendida."""
 
 
 @dataclass(frozen=True)
 class ModuleSpec:
-    """Where the real module lives and what it needs to actually run."""
+    """Onde fica o módulo real e o que ele precisa para de fato executar."""
 
     name: str
-    key: str  # short key used in the runner output (a1, a2, …)
-    real: str  # dotted path of the real implementation
-    stub: str  # dotted path of the stub fallback
-    packages: tuple[str, ...] = ()  # imported lazily inside infer() — probe by spec
-    artifacts: tuple[Path, ...] = ()  # trained weights that must exist on disk
-    env_vars: tuple[str, ...] = ()  # credentials that must be set
-    hint: str = ""  # how to make the real module available
+    key: str  # chave curta usada na saída do runner (a1, a2, …)
+    real: str  # caminho pontilhado da implementação real
+    stub: str  # caminho pontilhado do stub de fallback
+    packages: tuple[str, ...] = ()  # importados sob demanda dentro de infer() — checagem via spec
+    artifacts: tuple[Path, ...] = ()  # pesos treinados que precisam existir em disco
+    env_vars: tuple[str, ...] = ()  # credenciais que precisam estar definidas
+    hint: str = ""  # como tornar o módulo real disponível
 
 
 V2_POSTURE_HEAD = ROOT / "models" / "v2_posture_head.pkl"
@@ -76,7 +76,7 @@ REGISTRY: dict[str, ModuleSpec] = {
         key="a2",
         real="src.audio.a2_nlp.infer",
         stub="src.stubs.a2_nlp",
-        hint="T111/P3 entrega o PLN por regras",
+        hint="T111 entrega o PLN por regras",
     ),
     "a3_emotion": ModuleSpec(
         name="a3_emotion",
@@ -118,18 +118,18 @@ REGISTRY: dict[str, ModuleSpec] = {
 
 MODULE_NAMES: tuple[str, ...] = tuple(REGISTRY)
 
-# Accept both the full name (v2_pose) and the short key (v2) everywhere.
+# Aceita o nome completo (v2_pose) e a chave curta (v2) em qualquer lugar.
 _ALIASES: dict[str, str] = {name: name for name in REGISTRY}
 _ALIASES.update({spec.key: name for name, spec in REGISTRY.items()})
 
 
 @dataclass(frozen=True)
 class ResolvedModule:
-    """A module chosen by `get_module`, plus why it was chosen."""
+    """Módulo escolhido por `get_module`, mais o motivo da escolha."""
 
     spec: ModuleSpec
     origin: str  # "real" | "stub"
-    reason: str  # empty when origin == "real"
+    reason: str  # vazio quando origin == "real"
     module: ModuleType
 
     @property
@@ -150,7 +150,7 @@ class ResolvedModule:
 
 
 def canonical_name(name: str) -> str:
-    """Map a name or short key to the registry key. Raises on unknown names."""
+    """Mapeia um nome ou chave curta para a chave do registry. Levanta erro se o nome for desconhecido."""
     resolved = _ALIASES.get(str(name).strip().lower())
     if resolved is None:
         raise ModuleResolutionError(
@@ -175,7 +175,7 @@ def _hint(spec: ModuleSpec) -> str:
 
 
 def required_real() -> frozenset[str]:
-    """Modules that TC4_REQUIRE_REAL demands to be real. Raises on conflicts."""
+    """Módulos que TC4_REQUIRE_REAL exige que sejam reais. Levanta erro em caso de conflito."""
     raw = os.getenv(ENV_REQUIRE_REAL, "").replace(";", ",")
     names = frozenset(canonical_name(tok) for tok in raw.split(",") if tok.strip())
     if names and _flag(ENV_FORCE_STUBS):
@@ -193,7 +193,7 @@ def _has_package(package: str) -> bool:
 
 
 def _decide(spec: ModuleSpec) -> tuple[str, str, ModuleType]:
-    """Return (origin, reason, module) for one spec. Never raises on a fallback."""
+    """Retorna (origin, reason, module) para uma spec. Nunca levanta erro em um fallback."""
     stub = importlib.import_module(spec.stub)
 
     if _flag(ENV_FORCE_STUBS):
@@ -227,7 +227,7 @@ def _decide(spec: ModuleSpec) -> tuple[str, str, ModuleType]:
 
 
 def get_module(name: str, *, verbose: bool = False) -> ResolvedModule:
-    """Resolve one pipeline module to its real implementation or to the stub."""
+    """Resolve um módulo do pipeline para a implementação real ou para o stub."""
     spec = REGISTRY[canonical_name(name)]
     required = required_real()  # valida as env vars mesmo quando o real está OK
     origin, reason, module = _decide(spec)
@@ -244,7 +244,7 @@ def get_module(name: str, *, verbose: bool = False) -> ResolvedModule:
 
 
 class ResolvedPipeline:
-    """The six pipeline modules resolved once, timed on every call."""
+    """Os seis módulos do pipeline resolvidos uma vez, com medição de tempo a cada chamada."""
 
     def __init__(
         self, names: Iterable[str] | None = None, *, verbose: bool = True
@@ -265,7 +265,7 @@ class ResolvedPipeline:
         return self[name].origin
 
     def origins(self) -> dict[str, str]:
-        """Short-key map for the runner output: {"a1": "stub", "v1": "real", …}."""
+        """Mapa de chaves curtas para a saída do runner: {"a1": "stub", "v1": "real", …}."""
         return {m.key: m.origin for m in self._modules.values()}
 
     def timings_ms(self) -> dict[str, float]:
@@ -277,7 +277,7 @@ class ResolvedPipeline:
             print(f"[resolve]   {resolved.describe()}")
 
     def call(self, name: str, *args: Any, **kwargs: Any) -> Any:
-        """Run `infer()`, timing it. A real module that blows up degrades to the stub."""
+        """Executa `infer()`, medindo o tempo. Se o módulo real falhar, degrada para o stub."""
         resolved = self[name]
         started = time.perf_counter()
         try:

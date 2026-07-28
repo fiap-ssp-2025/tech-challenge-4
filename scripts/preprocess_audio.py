@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""Resample CORAA SER to 8 kHz mono, normalize amplitude, write labels.csv.
+"""Reamostra CORAA SER para 8 kHz mono, normaliza amplitude e escreve labels.csv.
 
-Outputs:
+Saídas:
   data/audio_ptbr/processed/*.wav
-  data/audio_ptbr/labels.csv   columns: path,label,speaker,split
+  data/audio_ptbr/labels.csv   colunas: path,label,speaker,split
 
-Binary vocabulary: {neutral, non_neutral}
+Vocabulário binário: {neutral, non_neutral}
   neutral              ← neutral
   non_neutral          ← non-neutral-female | non-neutral-male
 
-Speaker = C-ORAL-BRASIL recording id (first token of the original filename).
-Split is speaker-independent (no speaker in more than one of train/val/test).
+Speaker = id da gravação C-ORAL-BRASIL (primeiro token do nome original).
+O split é independente de locutor (nenhum speaker em mais de um de train/val/test).
 """
 
 from __future__ import annotations
@@ -73,13 +73,13 @@ def collect_raw_rows(raw_dir: Path) -> list[dict[str, str]]:
         hashed = Path(str(item["wav_file"]))
         src = test_dir / hashed.name
         if not src.is_file():
-            # zip may nest under test_ser/
+            # o zip pode aninhar sob test_ser/
             candidates = list(test_dir.rglob(hashed.name))
             if not candidates:
                 raise FileNotFoundError(f"Missing test wav: {hashed.name}")
             src = candidates[0]
         speaker, label = parse_original_stem(original.stem)
-        # Prefer original CORAA name so path encodes speaker/label.
+        # Prefere o nome original CORAA para o path carregar speaker/label.
         rows.append(
             {
                 "src": str(src),
@@ -112,9 +112,9 @@ def speaker_independent_split(
     test_size: float = 0.15,
     seed: int = 42,
 ) -> pd.Series:
-    """Assign train/val/test so each speaker appears in exactly one split."""
+    """Atribui train/val/test de modo que cada locutor apareça em exatamente um split."""
     speakers = df[["speaker", "label"]].drop_duplicates(subset=["speaker"]).copy()
-    # Stratify on whether the speaker has any non_neutral segment.
+    # Estratifica se o locutor tem algum segmento non_neutral.
     has_nn = (
         df.assign(is_nn=(df["label"] == "non_neutral").astype(int))
         .groupby("speaker")["is_nn"]
@@ -124,13 +124,13 @@ def speaker_independent_split(
     speaker_ids = speakers["speaker"].to_numpy()
     strata = speakers["strata"].to_numpy()
 
-    # First peel off test, then peel val from the remainder.
+    # Primeiro separa o test; depois tira o val do restante.
     gss_test = GroupShuffleSplit(n_splits=1, test_size=test_size, random_state=seed)
     train_val_idx, test_idx = next(gss_test.split(speaker_ids, strata, groups=speaker_ids))
 
     remaining = speaker_ids[train_val_idx]
     remaining_strata = strata[train_val_idx]
-    # val_size relative to the full set → rescale against remaining
+    # val_size é relativo ao conjunto total → reescala em relação ao restante
     val_rel = val_size / (1.0 - test_size)
     gss_val = GroupShuffleSplit(n_splits=1, test_size=val_rel, random_state=seed)
     train_idx_rel, val_idx_rel = next(
@@ -178,7 +178,7 @@ def main() -> int:
     labels = pd.DataFrame(records)
     labels["split"] = speaker_independent_split(labels, seed=args.seed)
 
-    # Hard guarantee: no speaker crosses splits.
+    # Garantia forte: nenhum locutor atravessa splits.
     crossed = labels.groupby("speaker")["split"].nunique()
     bad = crossed[crossed > 1]
     if len(bad):

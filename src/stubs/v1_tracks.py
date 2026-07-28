@@ -1,4 +1,4 @@
-"""V1 tracks stub — fixed person count and tracks."""
+"""Stub V1 tracks — contagem de pessoas e tracks fixos."""
 
 from __future__ import annotations
 

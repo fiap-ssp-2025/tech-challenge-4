@@ -106,7 +106,7 @@ Limitando o áudio de demonstração a 4 kHz para imitar o treino, o escore **pi
 | Diarização erra o agrupamento e junta duas vozes | O escore pode ficar **menor** que o do áudio bruto (ver "Como a agregação fica" — não é monotônico). Aceito: o valor maior vinha de janela contaminada, que é o artefato a eliminar |
 | Chamada extra ao Azure encarece/atrasa | Tier F0 cobre; medir e reportar no `[tempo]` do runner |
 | Azure indisponível na hora da demo | RF-22 garante o caminho atual; ensaiar com `TC4_FORCE_STUBS=1` como plano B |
-| Mexer no módulo do P2 durante congelamento | Mudança aditiva: sem diarização, o comportamento é bit-a-bit o de hoje; testes cobrem os dois caminhos |
+| Mexer no módulo A3 durante congelamento | Mudança aditiva: sem diarização, o comportamento é bit-a-bit o de hoje; testes cobrem os dois caminhos |
 
 ## Conformidade com a constituição
 

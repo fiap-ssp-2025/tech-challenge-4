@@ -1,4 +1,4 @@
-"""Correlation tests against synthetic session events (feature 002)."""
+"""Testes de correlação sobre eventos sintéticos de sessão (feature 002)."""
 
 from pathlib import Path
 

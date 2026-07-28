@@ -1,4 +1,4 @@
-"""Unit tests for T104 face dataset helpers (no heavy downloads)."""
+"""Testes unitários dos helpers do dataset facial T104 (sem downloads pesados)."""
 
 from __future__ import annotations
 
@@ -24,7 +24,7 @@ def test_parse_ravdess_emotion_and_sex():
     assert meta is not None
     assert meta["emotion"] == "fearful"
     assert meta["actor"] == "ravdess_12"
-    assert meta["sex"] == "F"  # even = female
+    assert meta["sex"] == "F"  # par = feminino
     assert meta["dataset"] == "ravdess"
 
     male = parse_ravdess_filename("01-01-01-01-01-01-01.mp4")
@@ -57,7 +57,7 @@ def test_actor_split_no_leakage_and_covers_all():
     mapping = assign_actor_splits(actors, seed=0)
     assert len(mapping) == 24
     assert set(mapping.values()).issubset({"train", "val", "test"})
-    # Build fake frame table
+    # Monta tabela falsa de frames
     rows = []
     for actor, split in mapping.items():
         for _ in range(5):
@@ -84,7 +84,7 @@ def test_balance_binary_labels_undersamples_majority():
 
 
 def test_labels_schema_fixture(tmp_path: Path):
-    """Synthetic labels.csv + jpgs satisfy verify invariants."""
+    """labels.csv + jpgs sintéticos satisfazem os invariantes do verify."""
     faces = tmp_path / "faces"
     faces.mkdir()
     actors = ["ravdess_02", "ravdess_04", "ravdess_06", "ravdess_08", "ravdess_10"]
@@ -97,7 +97,7 @@ def test_labels_schema_fixture(tmp_path: Path):
         for label, emotion in (("desconforto", "fearful"), ("neutro", "neutral")):
             for _ in range(5):
                 name = f"{actor}_{label}_{i}.jpg"
-                (faces / name).write_bytes(b"\xff\xd8\xff")  # minimal jpeg header-ish
+                (faces / name).write_bytes(b"\xff\xd8\xff")  # cabeçalho jpeg mínimo-ish
                 rows.append(
                     {
                         "path": str(faces / name),

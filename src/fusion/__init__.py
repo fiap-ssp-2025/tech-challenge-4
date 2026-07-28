@@ -1,4 +1,4 @@
-"""Fusion package (C/D): correlation, scoring, occurrence report."""
+"""Pacote de fusão (C/D): correlação, escore, nota de ocorrência."""
 
 from src.fusion.correlate import correlate, haversine_m, within_correlation
 from src.fusion.report import DISCLAIMER, build_report

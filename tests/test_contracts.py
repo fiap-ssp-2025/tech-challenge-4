@@ -1,4 +1,4 @@
-"""Contract validation tests."""
+"""Testes de validação de contratos."""
 
 import pytest
 

@@ -1,4 +1,4 @@
-"""Rule-based classification and extraction helpers for A2 NLP."""
+"""Helpers de classificação e extração por regras para o A2 NLP."""
 
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from .rules import (
 
 
 def normalize_text(text: str) -> str:
-    """Normalize text for rule matching while preserving readable spacing."""
+    """Normaliza o texto para matching de regras, preservando espaçamento legível."""
     normalized = unicodedata.normalize("NFKC", text)
     normalized = normalized.lower()
     normalized = re.sub(r"\s+", " ", normalized)
@@ -26,10 +26,10 @@ def normalize_text(text: str) -> str:
 
 def _is_negated(text: str, start_index: int, window: int = 35) -> bool:
     """
-    Check whether a matched expression is preceded by a nearby negation.
+    Verifica se a expressão casada é precedida por uma negação próxima.
 
-    Example:
-        "ele nunca me bateu" -> violence match is considered negated.
+    Exemplo:
+        "ele nunca me bateu" → o match de violência é considerado negado.
     """
     prefix = text[max(0, start_index - window) : start_index]
     words = re.findall(r"\b[\wÀ-ÿ]+\b", prefix)
@@ -47,7 +47,7 @@ def _contains_non_negated_term(text: str, terms: tuple[str, ...]) -> bool:
 
 
 def classify_report(text: str) -> TipoRelato:
-    """Classify the report using deterministic rules."""
+    """Classifica o relato com regras determinísticas."""
     normalized = normalize_text(text)
 
     if not normalized:
@@ -71,10 +71,10 @@ def _extract_first_pattern(text: str, patterns: tuple[str, ...]) -> str:
 
 
 def extract_location(text: str) -> str:
-    """Extract the first known location expression."""
+    """Extrai a primeira expressão de local conhecida."""
     return _extract_first_pattern(text, LOCAL_PATTERNS)
 
 
 def extract_time(text: str) -> str:
-    """Extract the first known time expression."""
+    """Extrai a primeira expressão de tempo conhecida."""
     return _extract_first_pattern(text, TIME_PATTERNS)

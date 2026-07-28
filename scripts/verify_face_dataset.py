@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Acceptance checks for T104 (face frames RAVDESS/CREMA-D)."""
+"""Checagens de aceite do T104 (frames faciais RAVDESS/CREMA-D)."""
 
 from __future__ import annotations
 

@@ -1,8 +1,8 @@
-"""Session correlation for audio↔video events (C/D, feature 002).
+"""Correlação de sessão para eventos áudio↔vídeo (C/D, feature 002).
 
-Primary path: same ``session_id`` within the time window (audio and video of
-the same consultation). The geographic path (haversine) is kept as a legacy
-utility from feature 001 and used only when both events lack ``session_id``.
+Caminho primário: mesmo ``session_id`` dentro da janela de tempo (áudio e vídeo
+da mesma consulta). O caminho geográfico (haversine) fica como utilitário legado
+da feature 001 e só é usado quando ambos os eventos não têm ``session_id``.
 """
 
 from __future__ import annotations
@@ -17,7 +17,7 @@ DEFAULT_WINDOW_MINUTES = 10.0
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
-    """Great-circle distance in meters between two WGS84 points."""
+    """Distância ortodrômica em metros entre dois pontos WGS84."""
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     d_phi = math.radians(lat2 - lat1)
     d_lambda = math.radians(lon2 - lon1)
@@ -31,7 +31,7 @@ def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
 def _parse_ts(value: str | datetime) -> datetime:
     if isinstance(value, datetime):
         return value
-    # Accept ISO-8601 with optional Z
+    # Aceita ISO-8601 com Z opcional
     text = value.replace("Z", "+00:00") if isinstance(value, str) else value
     return datetime.fromisoformat(text)
 
@@ -58,7 +58,7 @@ def same_session(
     *,
     window_minutes: float = DEFAULT_WINDOW_MINUTES,
 ) -> bool:
-    """True if both events carry the same session_id within the time window."""
+    """Verdadeiro se ambos os eventos tiverem o mesmo session_id dentro da janela de tempo."""
     sid_a = audio_event.get("session_id")
     sid_v = video_event.get("session_id")
     if not sid_a or not sid_v or sid_a != sid_v:
@@ -74,7 +74,7 @@ def within_correlation(
     radius_m: float = DEFAULT_RADIUS_M,
     window_minutes: float = DEFAULT_WINDOW_MINUTES,
 ) -> bool:
-    """Primary: session match. Fallback (legacy 001): geo radius + window."""
+    """Primário: match por sessão. Fallback (legado 001): raio geográfico + janela."""
     if audio_event.get("session_id") or video_event.get("session_id"):
         return same_session(audio_event, video_event, window_minutes=window_minutes)
     alat, alon = _event_coords(audio_event)
@@ -92,7 +92,7 @@ def correlate(
     radius_m: float = DEFAULT_RADIUS_M,
     window_minutes: float = DEFAULT_WINDOW_MINUTES,
 ) -> list[tuple[dict[str, Any], dict[str, Any]]]:
-    """Return all (audio, video) pairs that match radius + time window."""
+    """Retorna todos os pares (áudio, vídeo) que batem raio + janela de tempo."""
     audios = list(audio_events)
     videos = list(video_events)
     pairs: list[tuple[dict[str, Any], dict[str, Any]]] = []

@@ -1,4 +1,4 @@
-"""T104 helpers: emotion parsing, binary labels, actor-wise split (no training)."""
+"""Helpers T104: parsing de emoção, rótulos binários, split por ator (sem treino)."""
 
 from __future__ import annotations
 
@@ -7,9 +7,9 @@ from dataclasses import dataclass
 
 import pandas as pd
 
-# Binary target for V3 (desconforto facial).
+# Alvo binário do V3 (desconforto facial).
 DISCOMFORT_EMOTIONS = frozenset({"fearful", "sad"})
-NEUTRAL_EMOTIONS = frozenset({"neutral", "calm"})  # calm→neutro for class balance (≥40%)
+NEUTRAL_EMOTIONS = frozenset({"neutral", "calm"})  # calm→neutro para balanceamento de classes (≥40%)
 
 RAVDESS_EMOTION = {
     "01": "neutral",
@@ -38,13 +38,13 @@ LABELS_COLUMNS = ("path", "emotion", "actor", "dataset", "label", "split", "sex"
 
 @dataclass(frozen=True)
 class ActorInfo:
-    actor_id: str  # e.g. "ravdess_02"
+    actor_id: str  # ex.: "ravdess_02"
     sex: str  # "F" | "M" | "U"
     dataset: str
 
 
 def emotion_to_binary(emotion: str) -> str | None:
-    """Map fine emotion → {desconforto, neutro}; None if out of scope."""
+    """Mapeia emoção fina → {desconforto, neutro}; None se fora do escopo."""
     if emotion in DISCOMFORT_EMOTIONS:
         return "desconforto"
     if emotion in NEUTRAL_EMOTIONS:
@@ -53,7 +53,7 @@ def emotion_to_binary(emotion: str) -> str | None:
 
 
 def parse_ravdess_filename(name: str) -> dict[str, str] | None:
-    """Parse RAVDESS stem: modality-channel-emotion-intensity-statement-rep-actor."""
+    """Faz parse do stem RAVDESS: modality-channel-emotion-intensity-statement-rep-actor."""
     stem = name.rsplit(".", 1)[0]
     parts = stem.split("-")
     if len(parts) != 7:
@@ -73,7 +73,7 @@ def parse_ravdess_filename(name: str) -> dict[str, str] | None:
 
 
 def parse_cremad_filename(name: str) -> dict[str, str] | None:
-    """Parse CREMA-D stem: ActorID_Sentence_Emotion_Intensity."""
+    """Faz parse do stem CREMA-D: ActorID_Sentence_Emotion_Intensity."""
     stem = name.rsplit(".", 1)[0]
     parts = stem.split("_")
     if len(parts) < 3:
@@ -87,13 +87,13 @@ def parse_cremad_filename(name: str) -> dict[str, str] | None:
         "emotion": emotion,
         "actor": f"crema_{actor_num}",
         "dataset": "cremad",
-        "sex": "U",  # filled from demographics when available
+        "sex": "U",  # preenchido a partir do demographics quando disponível
         "modality": "video",
     }
 
 
 def load_cremad_sex_map(demographics_csv) -> dict[str, str]:
-    """ActorID → 'F'|'M' from VideoDemographics.csv."""
+    """ActorID → 'F'|'M' a partir de VideoDemographics.csv."""
     df = pd.read_csv(demographics_csv)
     out: dict[str, str] = {}
     for _, row in df.iterrows():
@@ -110,10 +110,10 @@ def assign_actor_splits(
     val_ratio: float = 0.15,
     seed: int = 42,
 ) -> dict[str, str]:
-    """Assign each actor to exactly one split; prefer female balance across splits.
+    """Atribui cada ator a exatamente um split; prioriza equilíbrio feminino entre splits.
 
-    Strategy: shuffle within sex strata, then round-robin into train/val/test buckets
-    sized by ratios (female first, then male/unknown).
+    Estratégia: embaralha dentro dos estratos de sexo e depois distribui em round-robin
+    nos buckets train/val/test dimensionados pelas razões (mulheres primeiro, depois M/U).
     """
     import random
 
@@ -125,7 +125,7 @@ def assign_actor_splits(
         rng.shuffle(by_sex[sex])
 
     ordered: list[ActorInfo] = []
-    # Female first (plan: prioritize female representation), then M, then U.
+    # Mulheres primeiro (plano: priorizar representação feminina), depois M, depois U.
     for sex in ("F", "M", "U"):
         ordered.extend(by_sex.get(sex, []))
 
@@ -138,7 +138,7 @@ def assign_actor_splits(
         n_val = max(0, n - n_train - (1 if n - n_train > 1 else 0))
     n_test = n - n_train - n_val
 
-    # Distribute round-robin so each split gets females early.
+    # Distribui em round-robin para que cada split receba mulheres cedo.
     buckets = {
         "train": [],
         "val": [],
@@ -148,7 +148,7 @@ def assign_actor_splits(
     cycle = [s for s in ("train", "val", "test") if caps[s] > 0]
     idx = 0
     for actor in ordered:
-        # Find next bucket with capacity
+        # Encontra o próximo bucket com capacidade
         placed = False
         for _ in range(len(cycle)):
             split = cycle[idx % len(cycle)]
@@ -180,11 +180,11 @@ def balance_binary_labels(
     min_ratio: float = 0.40,
     seed: int = 42,
 ) -> pd.DataFrame:
-    """Undersample the majority binary class until minority share ≥ min_ratio.
+    """Faz undersample da classe binária majoritária até a minoria ter proporção ≥ min_ratio.
 
-    Needed when CREMA-D (more FEA/SAD than NEU) dilutes the RAVDESS balance.
-    Keeps actor-wise rows intact for remaining samples; call assign_actor_splits
-    again after this if desired.
+    Necessário quando o CREMA-D (mais FEA/SAD do que NEU) dilui o equilíbrio do RAVDESS.
+    Mantém as linhas por ator intactas nas amostras restantes; chame assign_actor_splits
+    de novo depois disso se desejar.
     """
     counts = df["label"].value_counts()
     if len(counts) < 2:
@@ -192,7 +192,7 @@ def balance_binary_labels(
     minority_label = counts.idxmin()
     majority_label = counts.idxmax()
     n_min = int(counts[minority_label])
-    # minority / total >= min_ratio  ⇒  n_min / (n_min + n_maj) >= r
+    # minoria / total >= min_ratio  ⇒  n_min / (n_min + n_maj) >= r
     # ⇒ n_maj <= n_min * (1-r)/r
     max_maj = int(n_min * (1.0 - min_ratio) / min_ratio)
     maj = df[df["label"] == majority_label]

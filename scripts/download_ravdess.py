@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Download RAVDESS Video_Speech_Actor_01..24 into data/video_consulta/raw/ravdess/.
+"""Baixa RAVDESS Video_Speech_Actor_01..24 em data/video_consulta/raw/ravdess/.
 
-Source: https://zenodo.org/record/1188976
-License: CC BY-NC-SA 4.0
+Fonte: https://zenodo.org/record/1188976
+Licença: CC BY-NC-SA 4.0
 
-Downloads each Video_Speech_Actor_XX.zip with progress + resume (skips actors
-already extracted). Zips are removed after a successful extract.
+Baixa cada Video_Speech_Actor_XX.zip com barra de progresso e retomada
+(pula atores já extraídos). Os zips são removidos após extração bem-sucedida.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from tqdm import tqdm
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RAW = ROOT / "data" / "video_consulta" / "raw" / "ravdess"
 ZENODO_BASE = "https://zenodo.org/record/1188976/files"
-# Confirmed on Zenodo record API — Speech video zips exist for actors 01-24.
+# Confirmado na API do registro Zenodo — zips de vídeo Speech existem para atores 01-24.
 ZIP_NAME = "Video_Speech_Actor_{actor:02d}.zip"
 
 
@@ -30,7 +30,7 @@ def actor_ready(raw_dir: Path, actor_id: int) -> bool:
 
 
 def download_zip(url: str, dest_zip: Path) -> None:
-    """Stream download with tqdm; resume via HTTP Range if a partial zip exists."""
+    """Download em stream com tqdm; retoma via HTTP Range se houver zip parcial."""
     dest_zip.parent.mkdir(parents=True, exist_ok=True)
     headers = {}
     mode = "wb"
@@ -45,7 +45,7 @@ def download_zip(url: str, dest_zip: Path) -> None:
                 f"404 for {url}. Check the real filename on "
                 "https://zenodo.org/record/1188976"
             )
-        # 416 = already complete / invalid range → re-download from scratch
+        # 416 = já completo / Range inválido → baixar de novo do zero
         if response.status_code == 416:
             dest_zip.unlink(missing_ok=True)
             return download_zip(url, dest_zip)
@@ -54,7 +54,7 @@ def download_zip(url: str, dest_zip: Path) -> None:
         total = response.headers.get("content-length")
         total_i = int(total) + existing if total else existing
         if response.status_code == 200 and existing > 0:
-            # Server ignored Range — restart
+            # Servidor ignorou Range — reinicia
             mode = "wb"
             existing = 0
             total_i = int(total) if total else 0

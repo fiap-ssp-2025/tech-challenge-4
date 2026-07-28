@@ -1,4 +1,4 @@
-"""End-to-end pipeline with stubs."""
+"""Pipeline ponta a ponta com stubs."""
 
 from pathlib import Path
 

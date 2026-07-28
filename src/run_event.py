@@ -1,4 +1,4 @@
-"""End-to-end session runner: consulta .wav + .mp4 → triage note (feature 002)."""
+"""Runner ponta a ponta da sessão: consulta .wav + .mp4 → nota de triagem (feature 002)."""
 
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from src.fusion.correlate import within_correlation
 from src.fusion.report import build_report
 from src.resolve import ResolvedPipeline
 
-# Default demo session — áudio e vídeo da MESMA consulta.
+# Sessão demo padrão — áudio e vídeo da MESMA consulta.
 DEFAULT_SESSION_ID = "consulta-demo"
 
 
@@ -30,7 +30,7 @@ def run_pipeline(
     video_ts: str | None = None,
     modules: ResolvedPipeline | None = None,
 ) -> dict:
-    """A1→A2→A3→alert→session correlation→V1/V2/V3→score→triage note."""
+    """A1→A2→A3→alerta→correlação por sessão→V1/V2/V3→escore→nota de triagem."""
     audio_path = Path(audio_path)
     video_path = Path(video_path)
     if not audio_path.is_file():
@@ -119,7 +119,7 @@ def run_pipeline(
 def _print_timings(
     resolved: dict[str, str], tempos_ms: dict[str, float], total_ms: float
 ) -> None:
-    """Per-module inference time — exigido no aceite da Etapa 3."""
+    """Tempo de inferência por módulo — exigido no aceite da Etapa 3."""
     print("[tempo] inferência por módulo (ms):")
     for key, ms in tempos_ms.items():
         print(f"[tempo]   {key:<3} {ms:>9.1f} ms  ({resolved.get(key, '?')})")
@@ -131,7 +131,7 @@ def make_dummy_media(
     mp4_path: Path = Path("dummy.mp4"),
     seconds: float = 2.0,
 ) -> tuple[Path, Path]:
-    """Create silent WAV + black MP4 for smoke tests."""
+    """Cria WAV silencioso + MP4 preto para smoke tests."""
     import numpy as np
     import soundfile as sf
     import cv2

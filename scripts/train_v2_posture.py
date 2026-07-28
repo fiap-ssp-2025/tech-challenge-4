@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Train posture classifier (defensiva vs neutra) on YOLOv8-pose keypoints.
+"""Treina classificador de postura (defensiva vs neutra) sobre keypoints YOLOv8-pose.
 
-Input:  data/pose_posture/annotations/keypoints.csv
-Output: models/v2_posture_head.pkl  (scikit-learn Pipeline)
+Entrada:  data/pose_posture/annotations/keypoints.csv
+Saída:    models/v2_posture_head.pkl  (Pipeline scikit-learn)
 
-Features: normalised keypoints (relative to torso centre/height) + 9 geometric
-          angles/distances derived from upper-body joints.
-Model:    GradientBoostingClassifier — robust to scale, handles non-linearity.
-Split:    by actor (no leakage between train/test).
+Features: keypoints normalizados (relativos ao centro/altura do torso) + 9 ângulos/
+          distâncias geométricas das juntas do tronco superior.
+Modelo:   GradientBoostingClassifier — robusto a escala, lida com não-linearidade.
+Split:    por ator (sem vazamento entre train/test).
 
-Usage:
+Uso:
     uv run python scripts/train_v2_posture.py
     uv run python scripts/train_v2_posture.py --test-actors 7 8
 """
@@ -34,7 +34,7 @@ DEFAULT_MODEL_DIR = ROOT / "models"
 
 N_KP_COLS = 51  # 17 keypoints × (x, y, conf)
 
-# COCO keypoint indices used for feature engineering
+# Índices COCO usados na engenharia de features
 _NOSE = 0
 _L_SHOULDER, _R_SHOULDER = 5, 6
 _L_ELBOW,    _R_ELBOW    = 7, 8
@@ -43,17 +43,17 @@ _L_HIP,      _R_HIP      = 11, 12
 
 
 def _angle_at_b(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> float:
-    """Angle (radians) at point b formed by segments b-a and b-c."""
+    """Ângulo (radianos) no ponto b formado pelos segmentos b-a e b-c."""
     ba = a - b; bc = c - b
     cos_v = np.dot(ba, bc) / (np.linalg.norm(ba) * np.linalg.norm(bc) + 1e-6)
     return float(np.arccos(np.clip(cos_v, -1.0, 1.0)))
 
 
 def engineer_features(raw: np.ndarray) -> np.ndarray:
-    """Convert (N, 51) raw keypoints → (N, 43) normalised + geometric features.
+    """Converte keypoints brutos (N, 51) → (N, 43) normalizados + features geométricas.
 
-    Normalisation: translate to torso centre, scale by torso height → position
-    and scale invariant, so the model generalises across camera distances.
+    Normalização: traduz para o centro do torso, escala pela altura do torso →
+    invariante a posição e escala, para generalizar entre distâncias de câmera.
     """
     kps = raw.reshape(-1, 17, 3)           # (N, 17, 3)
     N = len(kps)
@@ -67,12 +67,12 @@ def engineer_features(raw: np.ndarray) -> np.ndarray:
         torso_h      = np.linalg.norm(shoulder_mid - hip_mid) + 1e-6
         torso_c      = (shoulder_mid + hip_mid) / 2.0
 
-        xy_n = (xy - torso_c) / torso_h   # (17, 2) normalised
+        xy_n = (xy - torso_c) / torso_h   # (17, 2) normalizado
 
-        # 34 normalised (x,y) values
+        # 34 valores (x,y) normalizados
         out[i, :34] = xy_n.flatten()
 
-        # 9 geometric features
+        # 9 features geométricas
         head_drop      = float(xy_n[_NOSE, 1] - ((xy_n[_L_SHOULDER, 1] + xy_n[_R_SHOULDER, 1]) / 2))
         shoulder_asym  = float(xy_n[_L_SHOULDER, 1] - xy_n[_R_SHOULDER, 1])
         shoulder_width = float(abs(xy_n[_L_SHOULDER, 0] - xy_n[_R_SHOULDER, 0]))
@@ -183,7 +183,7 @@ def main() -> int:
     print(classification_report(y_test, y_pred, target_names=["neutra", "defensiva"]))
     print(f"F1 macro: {f1_macro:.4f}")
 
-    # Save model
+    # Salva o modelo
     args.model_dir.mkdir(parents=True, exist_ok=True)
     model_path = args.model_dir / "v2_posture_head.pkl"
     joblib.dump(pipeline, model_path)
@@ -199,8 +199,8 @@ def main() -> int:
     metrics_path.write_text(json.dumps(metrics, indent=2))
     print(f"Metrics saved → {metrics_path}")
 
-    # V2 (P5): aceite = F1 reportado (sem threshold mínimo obrigatório)
-    # O threshold F1 ≥ 0.70 é de V3 (P4 — desconforto facial).
+    # V2: aceite = F1 reportado (sem threshold mínimo obrigatório)
+    # O threshold F1 ≥ 0.70 é de V3 (desconforto facial).
     print(f"\n✓ V2 aceito: F1 macro {f1_macro:.4f} reportado (critério: reportar, sem mínimo)")
 
     return 0

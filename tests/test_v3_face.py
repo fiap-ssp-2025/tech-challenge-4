@@ -1,4 +1,4 @@
-"""V3 face (P4) — real module contract test + train/serve preprocessing guard."""
+"""V3 face — teste de contrato do módulo real + guarda de pré-processamento treino/serviço."""
 
 from pathlib import Path
 

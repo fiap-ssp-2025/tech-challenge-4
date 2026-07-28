@@ -1,4 +1,4 @@
-"""Tests for the real rule-based A2 NLP implementation."""
+"""Testes da implementação real A2 NLP baseada em regras."""
 
 from src.audio.a2_nlp.infer import infer
 from src.audio.a2_nlp.extractors import (

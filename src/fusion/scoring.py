@@ -1,6 +1,6 @@
-"""Weighted triage score for C/D fusion (feature 002 — consulta).
+"""Escore ponderado de triagem para a fusão C/D (feature 002 — consulta).
 
-Weights are documented rules (not learned). Sum = 1.00 — adjust only here.
+Os pesos são regras documentadas (não aprendidas). Soma = 1,00 — ajuste só aqui.
 
 Por que a corroboração NÃO pesa no escore (mudança de 26/07/2026): na 002 áudio e
 vídeo vêm sempre da mesma consulta, então `corroborado` é verdadeiro por construção.
@@ -78,7 +78,7 @@ def calibrate(raw: float, threshold: float) -> float:
 
 
 def relato_signal(tipo_relato: str) -> float:
-    """Normalize tipo_relato to [0, 1] per RELATO_SIGNAL (unknown → 0.0)."""
+    """Normaliza tipo_relato para [0, 1] conforme RELATO_SIGNAL (desconhecido → 0.0)."""
     return RELATO_SIGNAL.get(tipo_relato, 0.0)
 
 
@@ -92,7 +92,7 @@ def compute_score(
     weights: dict[str, float] | None = None,
     calibrado: bool = True,
 ) -> float:
-    """Weighted sum of calibrated signals in [0, 1].
+    """Soma ponderada dos sinais calibrados em [0, 1].
 
     Cada saída de modelo passa por `calibrate()` antes de entrar na soma, para que
     0,5 signifique a mesma coisa em todos os sinais. `relato` NÃO é calibrado: é um

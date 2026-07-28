@@ -1,4 +1,4 @@
-"""V1 tracks — YOLOv8n + ByteTrack (P5)."""
+"""V1 tracks — YOLOv8n + ByteTrack."""
 
 from __future__ import annotations
 
@@ -20,25 +20,25 @@ def _get_model():
 
 
 def infer(path: str | Path) -> V1Result:
-    """Run YOLOv8n + ByteTrack on video. Returns person tracks."""
+    """Executa YOLOv8n + ByteTrack no vídeo. Retorna tracks de pessoas."""
     video_path = Path(path)
     if not video_path.is_file():
-        raise FileNotFoundError(f"Video not found: {video_path}")
+        raise FileNotFoundError(f"Vídeo não encontrado: {video_path}")
 
     model = _get_model()
 
-    # stream=True yields one Result at a time instead of loading all frames into
-    # RAM — critical for long videos that would otherwise OOM on demo machines.
+    # stream=True entrega um Result por vez em vez de carregar todos os frames na
+    # RAM — crítico para vídeos longos que, do contrário, dariam OOM em máquinas de demo.
     results = model.track(
         source=str(video_path),
         persist=True,
         tracker="bytetrack.yaml",
-        classes=[0],   # class 0 = person
+        classes=[0],   # classe 0 = person
         stream=True,
         verbose=False,
     )
 
-    # Accumulate bboxes per track id
+    # Acumula bboxes por id de track
     track_data: dict[int, list[list[float]]] = {}
     for result in results:
         if result.boxes is None:

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Acceptance checks for T102 (CORAA 8 kHz + labels + speaker-independent split)."""
+"""Checagens de aceite do T102 (CORAA 8 kHz + labels + split independente de locutor)."""
 
 from __future__ import annotations
 
@@ -44,12 +44,12 @@ def main() -> int:
     assert set(df["label"]).issubset(ALLOWED_LABELS), set(df["label"])
     assert set(df["split"]).issubset(ALLOWED_SPLITS), set(df["split"])
 
-    # Zero speakers crossing splits.
+    # Nenhum locutor atravessa splits.
     per_speaker = df.groupby("speaker")["split"].nunique()
     leaked = per_speaker[per_speaker > 1]
     assert leaked.empty, f"Speakers in multiple splits: {leaked.index.tolist()}"
 
-    # Random sample: 8 kHz mono.
+    # Amostra aleatória: 8 kHz mono.
     rng = random.Random(args.seed)
     sample_paths = rng.sample(list(df["path"]), k=min(args.sample_size, len(df)))
     for rel in sample_paths:

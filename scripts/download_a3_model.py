@@ -7,7 +7,7 @@ para o stub.
 
 Autenticação: o repositório é privado, sob a organização `fiap-ssp-2025` no Hub. É preciso
 ser membro da org (papel `read` basta) e estar logado (`uv run hf auth login`) ou exportar
-`HF_TOKEN`. Se receber 401/403, peça ao P2 para te adicionar à organização.
+`HF_TOKEN`. Se receber 401/403, peça a um membro da org para te adicionar.
 
 Idempotente: o `snapshot_download` reaproveita o cache e só baixa o que falta.
 
@@ -57,7 +57,7 @@ def main() -> int:
     except (RepositoryNotFoundError, GatedRepoError):
         print(f"Sem acesso a {args.repo_id} (repositório privado).")
         print("Rode `uv run hf auth login` ou exporte HF_TOKEN.")
-        print("Se persistir, peça ao P2 para te adicionar à org fiap-ssp-2025 (papel `read`).")
+        print("Se persistir, peça a um membro da org fiap-ssp-2025 para te adicionar (papel `read`).")
         return 1
 
     missing = [f for f in ALLOW_PATTERNS if not (Path(path) / f).is_file()]

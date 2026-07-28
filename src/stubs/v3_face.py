@@ -1,4 +1,4 @@
-"""V3 facial-discomfort stub — fixed score until P4 delivers the FER model."""
+"""Stub V3 de desconforto facial — escore fixo até o modelo FER estar disponível."""
 
 from __future__ import annotations
 

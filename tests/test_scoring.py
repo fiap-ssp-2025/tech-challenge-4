@@ -1,4 +1,4 @@
-"""Scoring weights, calibração de escala e report disclaimer."""
+"""Pesos de scoring, calibração de escala e disclaimer do report."""
 
 import json
 from pathlib import Path

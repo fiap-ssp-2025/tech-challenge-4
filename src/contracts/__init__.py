@@ -1,4 +1,4 @@
-"""JSON contracts (feature 002 — triagem em consulta; immutable from Etapa 2)."""
+"""Contratos JSON (feature 002 — triagem em consulta; imutáveis a partir da Etapa 2)."""
 
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ class CDResult(TypedDict, total=False):
 
 
 class ContractError(ValueError):
-    """Raised when a module output violates its JSON contract."""
+    """Levantada quando a saída de um módulo viola o contrato JSON."""
 
 
 def _require_keys(data: dict[str, Any], keys: tuple[str, ...], name: str) -> None:

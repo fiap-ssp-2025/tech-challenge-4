@@ -2,7 +2,7 @@
 
 > **Decisão: GO.** Seguimos para congelamento, relatório e vídeo com os modelos que temos.
 > **Data:** 27/07/2026 · **Tarefas:** T023 / T120 (herdada da 001, ajustada na 002)
-> **Participantes:** P1–P5 (decisão do grupo)
+> **Participantes:** o grupo (decisão coletiva)
 
 ## Decisão
 
@@ -18,11 +18,11 @@ devem aparecer no relatório.
 
 | Módulo | Meta do plano | Resultado | Situação |
 |---|---|---|---|
-| **A3** — sofrimento na voz (P2) | F1 macro ≥ 0,75 | **0,7896** (limiar 0,17 calibrado na validação); 0,7171 no limiar padrão | ✅ atingida no limiar calibrado |
-| **V3** — desconforto facial (P4) | F1 macro ≥ 0,70 | **0,7108** por clipe · 0,7045 por frame; AUC 0,8076 | ✅ atingida sem ajuste de limiar |
-| **V2** — postura defensiva (P5) | reportar o F1 | **0,6868** (split por ator, seed 42) | ✅ critério era reportar |
-| **A1/A2** — STT e PLN (P3) | JSON estruturado em casos de teste | Azure validado em áudio real PT-BR; A2 extrai relato, local e tempo | ✅ |
-| **C/D** — fusão (P1) | contratos respeitados ponta a ponta | 6 módulos reais; 85 testes verdes | ✅ |
+| **A3** — sofrimento na voz | F1 macro ≥ 0,75 | **0,7896** (limiar 0,17 calibrado na validação); 0,7171 no limiar padrão | ✅ atingida no limiar calibrado |
+| **V3** — desconforto facial | F1 macro ≥ 0,70 | **0,7108** por clipe · 0,7045 por frame; AUC 0,8076 | ✅ atingida sem ajuste de limiar |
+| **V2** — postura defensiva | reportar o F1 | **0,6868** (split por ator, seed 42) | ✅ critério era reportar |
+| **A1/A2** — STT e PLN | JSON estruturado em casos de teste | Azure validado em áudio real PT-BR; A2 extrai relato, local e tempo | ✅ |
+| **C/D** — fusão | contratos respeitados ponta a ponta | 6 módulos reais; 85 testes verdes | ✅ |
 
 ## Ressalvas que acompanham o GO
 

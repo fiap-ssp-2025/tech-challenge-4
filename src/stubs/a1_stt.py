@@ -1,4 +1,4 @@
-"""A1 STT stub — does not call Azure; requires credentials to acknowledge cloud path."""
+"""Stub A1 STT — não chama Azure; exige credenciais para reconhecer o caminho em nuvem."""
 
 from __future__ import annotations
 
@@ -13,21 +13,21 @@ load_dotenv()
 
 _FALLBACK_MSG = (
     "AZURE_SPEECH_KEY ausente. Configure .env (veja .env.example) para o STT Azure. "
-    "Fallback offline faster-whisper ainda não está disponível (TODO P3)."
+    "Fallback offline faster-whisper ainda não está disponível."
 )
 
 
 def infer(path: str | Path) -> A12Result:
-    """Return a fixed A1/A2-shaped payload (transcription only; A2 stub fills structure).
+    """Retorna um payload fixo no formato A1/A2 (só transcrição; o stub A2 preenche a estrutura).
 
-    Raises RuntimeError if Azure credentials are missing — never calls the cloud API
-    from this stub. Use A2 stub for structured fields in the pipeline.
+    Levanta RuntimeError se as credenciais Azure estiverem ausentes — nunca chama a API
+    na nuvem a partir deste stub. Use o stub A2 para os campos estruturados no pipeline.
     """
     _ = Path(path)
     if not os.getenv("AZURE_SPEECH_KEY", "").strip():
         raise RuntimeError(_FALLBACK_MSG)
 
-    # Plausible fixed transcription; A2 stub owns tipo_relato/local/tempo.
+    # Transcrição fixa plausível; o stub A2 define tipo_relato/local/tempo.
     return validate_a12(
         {
             "transcricao": (

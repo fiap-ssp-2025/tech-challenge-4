@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Download CORAA SER v1.0 into data/audio_ptbr/raw/ (git-ignored).
+"""Baixa CORAA SER v1.0 em data/audio_ptbr/raw/ (ignorado pelo git).
 
-Official source: https://github.com/rmarcacini/ser-coraa-pt-br
-(TaRSila / NILC — SE&R 2022 shared task). Google Drive file IDs match the
-baselines used by the shared-task community (e.g. alefiury/SE-R-2022-SER-Track).
+Fonte oficial: https://github.com/rmarcacini/ser-coraa-pt-br
+(TaRSila / NILC — tarefa compartilhada SE&R 2022). Os IDs do Google Drive
+batem com os baselines usados pela comunidade da shared-task
+(ex.: alefiury/SE-R-2022-SER-Track).
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ import gdown
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_RAW = ROOT / "data" / "audio_ptbr" / "raw"
 
-# Public CORAA SER v1.0 assets (rmarcacini/ser-coraa-pt-br)
+# Artefatos públicos do CORAA SER v1.0 (rmarcacini/ser-coraa-pt-br)
 FILES = {
     "data_train.zip": "1N56YOgJ_plF4K8Eyh9hqiP0_O5L8uwya",
     "test_ser.zip": "1UQOi59rFbk5bVvaF7lQWFwRaae8eaOKV",

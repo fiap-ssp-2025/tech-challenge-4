@@ -83,7 +83,7 @@ necessário.
 
 - Diarização local (`pyannote.audio`) — dependência pesada e modelo com aceite manual; reavaliar
   se o Azure sair do ar.
-- Refatorar o A1 para reaproveitar a mesma chamada — desejável, mas é módulo do P3 e o projeto
+- Refatorar o A1 para reaproveitar a mesma chamada — desejável, mas o A1 é módulo separado e o projeto
   está entrando em congelamento. Registrado como trabalho futuro.
 - Identificar qual locutor é a paciente.
 - Retreinar o A3.

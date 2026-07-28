@@ -1,4 +1,4 @@
-"""Rule definitions for A2 NLP classification and extraction."""
+"""Definições de regras para classificação e extração do A2 NLP."""
 
 from __future__ import annotations
 

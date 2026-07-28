@@ -1,4 +1,4 @@
-"""Generate synthetic session events for fusion tests (feature 002 — consulta)."""
+"""Gera eventos de sessão sintéticos para testes de fusão (feature 002 — consulta)."""
 
 from __future__ import annotations
 
@@ -16,7 +16,7 @@ def _iso(dt: datetime) -> str:
 
 
 def build_events(base: datetime | None = None) -> list[dict]:
-    """6 paired sessions + 2 audio-only + 2 video-only + 2 time-divergent (>10 min)."""
+    """6 sessões pareadas + 2 só-áudio + 2 só-vídeo + 2 divergentes no tempo (>10 min)."""
     t0 = base or datetime(2026, 7, 23, 9, 0, 0, tzinfo=timezone.utc)
     events: list[dict] = []
 
@@ -32,7 +32,7 @@ def build_events(base: datetime | None = None) -> list[dict]:
             ev["pair_id"] = pair_id
         events.append(ev)
 
-    # 6 paired consultations: audio and video of the SAME session, 2 min apart.
+    # 6 consultas pareadas: áudio e vídeo da MESMA sessão, intervalo de 2 min.
     for i in range(1, 7):
         sid = f"consulta-{i:02d}"
         ts = t0 + timedelta(minutes=(i - 1) * 40)
@@ -44,12 +44,12 @@ def build_events(base: datetime | None = None) -> list[dict]:
         sid = f"consulta-a{i:02d}"
         add(f"{sid}-audio", "audio", "audio_only", sid, t0 + timedelta(hours=5, minutes=i * 15))
 
-    # 2 video-only
+    # 2 só-vídeo
     for i in range(1, 3):
         sid = f"consulta-v{i:02d}"
         add(f"{sid}-video", "video", "video_only", sid, t0 + timedelta(hours=6, minutes=i * 15))
 
-    # 2 time-divergent: mesma sessão, vídeo 30 min depois (> janela de 10 min)
+    # 2 divergentes no tempo: mesma sessão, vídeo 30 min depois (> janela de 10 min)
     for i in range(1, 3):
         sid = f"consulta-d{i:02d}"
         ts = t0 + timedelta(hours=7, minutes=i * 60)

@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-"""Extract pose keypoints from RAVDESS videos for posture classifier training.
+"""Extrai keypoints de pose de vídeos RAVDESS para treinar o classificador de postura.
 
 Pipeline:
-  1. Walk data/pose_posture/raw/ for .mp4 files.
-  2. Parse emotion from filename (position 3, 1-indexed, 2-digit code).
-  3. Map emotion → posture label:
+  1. Percorre data/pose_posture/raw/ em busca de .mp4.
+  2. Lê a emoção no nome do arquivo (posição 3, 1-indexada, código de 2 dígitos).
+  3. Mapeia emoção → rótulo de postura:
        fearful (06) + sad (04) → "defensiva"
        neutral (01) + calm (02) + happy (03) → "neutra"
-       other emotions are skipped.
-  4. Sample up to --max-frames-per-clip frames per clip.
-  5. Run YOLOv8-pose on each frame → extract 17 COCO keypoints (x, y, conf).
-  6. Keep only frames where exactly 1 person is detected with conf ≥ threshold.
-  7. Save keypoints + labels to data/pose_posture/annotations/keypoints.csv.
+       demais emoções são ignoradas.
+  4. Amostra até --max-frames-per-clip frames por clipe.
+  5. Roda YOLOv8-pose em cada frame → extrai 17 keypoints COCO (x, y, conf).
+  6. Mantém só frames com exatamente 1 pessoa detectada com conf ≥ limiar.
+  7. Salva keypoints + rótulos em data/pose_posture/annotations/keypoints.csv.
 
-Emotion codes (RAVDESS filename field 3):
+Códigos de emoção (campo 3 do nome RAVDESS):
   01=neutral, 02=calm, 03=happy, 04=sad,
   05=angry, 06=fearful, 07=disgust, 08=surprised
 """
@@ -35,19 +35,19 @@ DEFAULT_RAW = ROOT / "data" / "pose_posture" / "raw"
 DEFAULT_OUT = ROOT / "data" / "pose_posture" / "annotations"
 MODEL_NAME = "yolov8n-pose.pt"
 
-# RAVDESS emotion code → posture label (None = skip)
+# Código de emoção RAVDESS → rótulo de postura (None = pular)
 EMOTION_TO_LABEL: dict[str, str | None] = {
     "01": "neutra",    # neutral
     "02": "neutra",    # calm
     "03": "neutra",    # happy
     "04": "defensiva", # sad
-    "05": None,        # angry  (ambiguous for posture)
+    "05": None,        # angry  (ambíguo para postura)
     "06": "defensiva", # fearful
-    "07": None,        # disgust (ambiguous)
-    "08": None,        # surprised (ambiguous)
+    "07": None,        # disgust (ambíguo)
+    "08": None,        # surprised (ambíguo)
 }
 
-# 17 COCO keypoint names
+# Nomes dos 17 keypoints COCO
 KP_NAMES = [
     "nose", "left_eye", "right_eye", "left_ear", "right_ear",
     "left_shoulder", "right_shoulder", "left_elbow", "right_elbow",
@@ -57,13 +57,13 @@ KP_NAMES = [
 
 
 def parse_emotion(mp4_path: Path) -> str | None:
-    """Extract emotion code from RAVDESS filename (e.g. 03-01-06-...)."""
+    """Extrai o código de emoção do nome RAVDESS (ex.: 03-01-06-...)."""
     m = re.match(r"^\d{2}-\d{2}-(\d{2})-", mp4_path.name)
     return m.group(1) if m else None
 
 
 def extract_frames(video_path: Path, max_frames: int, step: int = 5) -> list[np.ndarray]:
-    """Sample up to max_frames frames from video, every `step` frames."""
+    """Amostra até max_frames frames do vídeo, a cada `step` frames."""
     cap = cv2.VideoCapture(str(video_path))
     frames = []
     idx = 0
@@ -79,7 +79,7 @@ def extract_frames(video_path: Path, max_frames: int, step: int = 5) -> list[np.
 
 
 def keypoints_to_row(kps: np.ndarray) -> list[float]:
-    """Flatten (17, 3) keypoints array [x, y, conf] → 51-element list."""
+    """Achata o array de keypoints (17, 3) [x, y, conf] → lista de 51 elementos."""
     return kps.flatten().tolist()
 
 
@@ -109,7 +109,7 @@ def main() -> int:
     print(f"Found {len(mp4_files)} videos. Loading YOLOv8-pose model...")
     model = YOLO(MODEL_NAME)
 
-    # CSV header: label, actor, emotion_code, + 51 keypoint values
+    # Cabeçalho CSV: label, actor, emotion_code, + 51 valores de keypoint
     kp_cols = [f"{name}_{axis}" for name in KP_NAMES for axis in ("x", "y", "conf")]
     header = ["label", "actor", "emotion_code", "video"] + kp_cols
 
@@ -131,7 +131,7 @@ def main() -> int:
                 skipped_emotion += 1
                 continue
 
-            # Actor id from parent folder name or filename last field
+            # Id do ator pela pasta pai ou pelo último campo do nome
             actor_match = re.search(r"Actor_(\d+)", str(mp4))
             actor_id = actor_match.group(1) if actor_match else "00"
 
@@ -144,7 +144,7 @@ def main() -> int:
                     skipped_detection += 1
                     continue
 
-                # Keep only single-person frames
+                # Mantém só frames com uma única pessoa
                 boxes = result.boxes
                 if boxes is None or len(boxes) != 1:
                     skipped_detection += 1
@@ -160,7 +160,7 @@ def main() -> int:
     print(f"  Skipped (ambiguous emotion): {skipped_emotion} clips")
     print(f"  Skipped (detection issues):  {skipped_detection} frames")
 
-    # Class balance report
+    # Relatório de balanceamento de classes
     import pandas as pd
     df = pd.read_csv(out_csv)
     print("\nClass balance:")

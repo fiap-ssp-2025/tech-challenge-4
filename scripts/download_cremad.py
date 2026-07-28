@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
-"""Sparse-checkout CREMA-D VideoFlash into data/video_consulta/raw/cremad/.
+"""Sparse-checkout do CREMA-D VideoFlash em data/video_consulta/raw/cremad/.
 
-Prefer the GitLab mirror (regular blobs, ~2.3 GB for VideoFlash) — the GitHub
-original uses git-lfs and often fails with HTTP 502:
+Prefira o mirror do GitLab (blobs normais, ~2,3 GB de VideoFlash) — o original
+no GitHub usa git-lfs e costuma falhar com HTTP 502:
   https://gitlab.com/cs-cooper-lab/crema-d-mirror
   (upstream: https://github.com/CheyneyComputerScience/CREMA-D)
 
-Decision (documented): by default verify/pull ONLY emotions NEU/FEA/SAD for
-FEMALE actors (plan: female-prioritized FER). Use --all-actors / --emotions
-to widen. Metadata (VideoDemographics.csv, README, LICENSE) is always fetched.
+Decisão (documentada): por padrão verificar/baixar SÓ emoções NEU/FEA/SAD de
+atores FEMININOS (plano: FER com prioridade feminina). Use --all-actors /
+--emotions para ampliar. Metadados (VideoDemographics.csv, README, LICENSE)
+sempre são baixados.
 """
 
 from __future__ import annotations
@@ -28,7 +29,7 @@ if str(ROOT) not in sys.path:
 from src.video.v3_face.face_dataset import load_cremad_sex_map
 
 DEFAULT_RAW = ROOT / "data" / "video_consulta" / "raw" / "cremad"
-# GitLab mirror ships VideoFlash as normal git objects (no flaky GitHub LFS).
+# O mirror GitLab traz VideoFlash como objetos git normais (sem LFS instável do GitHub).
 DEFAULT_REPO_URL = "https://gitlab.com/cs-cooper-lab/crema-d-mirror.git"
 DEFAULT_EMOTIONS = ("NEU", "FEA", "SAD")
 
@@ -39,11 +40,11 @@ def run(cmd: list[str], cwd: Path | None = None, check: bool = True) -> subproce
 
 
 def ensure_sparse_clone(raw_dir: Path, repo_url: str) -> Path:
-    """Clone with sparse checkout of VideoFlash + demographics."""
+    """Clona com sparse checkout de VideoFlash + demografia."""
     raw_dir.mkdir(parents=True, exist_ok=True)
     git_dir = raw_dir / ".git"
     if not git_dir.is_dir():
-        # Skip LFS smudge on clone; GitLab mirror usually has real blobs anyway.
+        # Pula smudge LFS no clone; o mirror GitLab em geral já tem blobs reais.
         env_prefix = ["git", "-c", "filter.lfs.smudge=", "-c", "filter.lfs.process="]
         run(
             env_prefix
@@ -58,7 +59,7 @@ def ensure_sparse_clone(raw_dir: Path, repo_url: str) -> Path:
     else:
         print(f"[skip] git repo already present at {raw_dir}")
 
-    # Non-cone allows listing individual files alongside VideoFlash/.
+    # Non-cone permite listar arquivos individuais junto com VideoFlash/.
     run(
         [
             "git",
@@ -120,7 +121,7 @@ def select_paths(
 
 
 def lfs_pull_selected(raw_dir: Path, paths: list[Path]) -> None:
-    """Pull LFS objects in batches (resumable) with a progress bar."""
+    """Puxa objetos LFS em lotes (retomável) com barra de progresso."""
     if not paths:
         print("[warn] no CREMA-D videos matched the filter")
         return
@@ -138,18 +139,18 @@ def lfs_pull_selected(raw_dir: Path, paths: list[Path]) -> None:
     if not pending:
         return
 
-    # Batch by actor id to avoid thousands of process spawns.
+    # Agrupa por id de ator para não disparar milhares de processos.
     by_actor: dict[str, list[Path]] = {}
     for path in pending:
         actor = path.name.split("_", 1)[0]
         by_actor.setdefault(actor, []).append(path)
 
     for actor, actor_paths in tqdm(sorted(by_actor.items()), desc="CREMA-D LFS actors"):
-        # Still pending within this actor?
+        # Ainda pendente neste ator?
         still = [p for p in actor_paths if is_lfs_pointer(p) or p.stat().st_size < 2048]
         if not still:
             continue
-        # Include globs for the three target emotions for this actor.
+        # Inclui globs das três emoções-alvo deste ator.
         patterns = [
             f"VideoFlash/{actor}_*_NEU_*.flv",
             f"VideoFlash/{actor}_*_FEA_*.flv",
@@ -163,12 +164,12 @@ def lfs_pull_selected(raw_dir: Path, paths: list[Path]) -> None:
         )
         if result.returncode != 0:
             print(f"[warn] batch LFS pull failed for actor {actor}; trying per-file…")
-            for path in still[:5]:  # sample retry; full set on next run
+            for path in still[:5]:  # amostra de retry; conjunto completo na próxima execução
                 rel = path.relative_to(raw_dir).as_posix()
                 run(["git", "lfs", "pull", f"--include={rel}"], cwd=raw_dir, check=False)
-            # Continue — resumable on next invocation
+            # Segue — retomável na próxima invocação
             continue
-        # Verify at least one real file landed
+        # Confirma que pelo menos um arquivo real chegou
         real_now = sum(1 for p in still if p.is_file() and p.stat().st_size > 2048 and not is_lfs_pointer(p))
         if real_now == 0:
             print(f"[warn] actor {actor}: LFS pull returned 0 real files (network?). Will resume later.")
@@ -211,7 +212,7 @@ def main() -> int:
     if not demo.is_file():
         raise SystemExit(f"Missing {demo} after sparse checkout")
     sex_map = load_cremad_sex_map(demo)
-    # Normalize keys to 4-digit strings used in filenames
+    # Normaliza chaves para strings de 4 dígitos usadas nos nomes de arquivo
     sex_map_norm = {f"{int(k):04d}": v for k, v in sex_map.items()}
 
     video_dir = args.raw_dir / "VideoFlash"

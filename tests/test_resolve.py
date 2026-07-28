@@ -1,4 +1,4 @@
-"""Resolution layer: real when available, stub otherwise — with an explicit reason."""
+"""Camada de resolução: real quando disponível, stub caso contrário — com motivo explícito."""
 
 import sys
 from dataclasses import replace
@@ -97,7 +97,7 @@ def test_real_that_only_reexports_the_stub_is_reported_as_stub(monkeypatch):
 
 
 def test_broken_real_import_falls_back_to_stub(monkeypatch):
-    # artifacts=() so the artifact probe doesn't fire before the import attempt.
+    # artifacts=() para a sonda de artefato não disparar antes da tentativa de import.
     spec = replace(
         REGISTRY["a3_emotion"], real="src.audio.a3_emotion.nao_existe", artifacts=()
     )
@@ -130,14 +130,14 @@ def test_v2_resolves_to_real_when_the_posture_head_exists():
 
 
 def test_registry_artifact_matches_the_path_the_v2_module_loads():
-    """Guarda contra o registry e o módulo do P5 divergirem sobre o .pkl."""
+    """Guarda contra o registry e o módulo V2 divergirem sobre o .pkl."""
     from src.video.v2_pose.infer import MODEL_PATH
 
     assert MODEL_PATH == resolve.V2_POSTURE_HEAD
 
 
 def test_registry_artifact_matches_the_dir_the_a3_module_loads():
-    """Guarda contra o registry e o módulo do P2 divergirem sobre o modelo."""
+    """Guarda contra o registry e o módulo A3 divergirem sobre o modelo."""
     from src.audio.a3_emotion.infer import MODEL_DIR
 
     assert MODEL_DIR == resolve.A3_EMOTION_DIR
@@ -145,7 +145,7 @@ def test_registry_artifact_matches_the_dir_the_a3_module_loads():
 
 
 def test_registry_artifact_matches_the_dir_the_v3_module_loads():
-    """Guarda contra o registry e o módulo do P4 divergirem sobre o modelo."""
+    """Guarda contra o registry e o módulo V3 divergirem sobre o modelo."""
     from src.video.v3_face.infer import MODEL_DIR
 
     assert MODEL_DIR == resolve.V3_FACE_DIR

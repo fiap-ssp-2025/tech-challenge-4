@@ -1,4 +1,4 @@
-"""A3 emotion (P2) — real module contract smoke test."""
+"""A3 emotion — smoke test de contrato do módulo real."""
 
 from pathlib import Path
 

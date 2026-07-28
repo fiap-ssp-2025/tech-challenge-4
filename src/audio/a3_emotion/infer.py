@@ -1,4 +1,4 @@
-"""A3 emotion — fine-tuned wav2vec2 PT-BR, sofrimento na voz (P2)."""
+"""A3 emotion — wav2vec2 PT-BR fine-tuned, sofrimento na voz."""
 
 from __future__ import annotations
 
@@ -8,9 +8,9 @@ from src.contracts import A3Result, validate_a3
 
 MODEL_DIR = Path(__file__).resolve().parents[3] / "models" / "a3_emotion"
 TARGET_SR = 16_000
-WINDOW_S = 6.0  # must match MAX_DURATION_S in scripts/train_a3_emotion.py
-MAX_DURATION_S = 30.0  # guard against pathological long inputs at inference time
-NON_NEUTRAL_ID = 1  # must match LABEL2ID in scripts/train_a3_emotion.py
+WINDOW_S = 6.0  # deve coincidir com MAX_DURATION_S em scripts/train_a3_emotion.py
+MAX_DURATION_S = 30.0  # proteção contra entradas patologicamente longas na inferência
+NON_NEUTRAL_ID = 1  # deve coincidir com LABEL2ID em scripts/train_a3_emotion.py
 
 _model = None
 _feature_extractor = None
@@ -21,7 +21,7 @@ def _get_model():
     if _model is None:
         if not MODEL_DIR.exists():
             raise FileNotFoundError(
-                f"A3 model not found: {MODEL_DIR}\n"
+                f"Modelo A3 não encontrado: {MODEL_DIR}\n"
                 "Run: uv run python scripts/train_a3_emotion.py"
             )
         from transformers import AutoFeatureExtractor, Wav2Vec2ForSequenceClassification
@@ -62,7 +62,7 @@ def _score_samples(y, model, feature_extractor) -> float:
 
 
 def infer(path: str | Path) -> A3Result:
-    """Estimate sofrimento (voice distress) score [0..1] from audio.
+    """Estima o escore de sofrimento (distress na voz) [0..1] a partir do áudio.
 
     Com mais de um locutor (feature 003), cada um é pontuado em separado e vale o
     MAIOR escore — a fala neutra do profissional não pode diluir a da paciente. Não
@@ -75,7 +75,7 @@ def infer(path: str | Path) -> A3Result:
 
     audio_path = Path(path)
     if not audio_path.is_file():
-        raise FileNotFoundError(f"Audio not found: {audio_path}")
+        raise FileNotFoundError(f"Áudio não encontrado: {audio_path}")
 
     model, feature_extractor = _get_model()
     y, _ = librosa.load(audio_path, sr=TARGET_SR, mono=True)

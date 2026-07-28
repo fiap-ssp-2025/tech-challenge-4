@@ -1,4 +1,4 @@
-"""A2 NLP stub — structured fields from (stub) transcription context."""
+"""Stub A2 NLP — campos estruturados a partir do contexto da transcrição (stub)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from src.contracts import A12Result, validate_a12
 
 
 def infer(path: str | Path, transcricao: str | None = None) -> A12Result:
-    """Return fixed structured A1/A2 contract. Optional transcricao overrides text."""
+    """Retorna contrato A1/A2 estruturado fixo. O parâmetro opcional transcricao sobrescreve o texto."""
     _ = Path(path)
     text = transcricao or (
         "Tenho medo de voltar para casa, ele fica muito nervoso comigo."

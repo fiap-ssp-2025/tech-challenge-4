@@ -56,7 +56,7 @@ def main() -> int:
         )
     except (RepositoryNotFoundError, GatedRepoError):
         print(f"Sem acesso a {args.repo_id}.")
-        print("Se for privado: `uv run hf auth login` (ou HF_TOKEN) e peça leitura ao P4.")
+        print("Se for privado: `uv run hf auth login` (ou HF_TOKEN) e peça acesso de leitura na org.")
         return 1
 
     missing = [f for f in REQUIRED if not (Path(path) / f).is_file()]

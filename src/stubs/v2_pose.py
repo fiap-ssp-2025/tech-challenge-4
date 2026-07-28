@@ -1,4 +1,4 @@
-"""V2 pose stub — fixed defensive posture score."""
+"""Stub V2 pose — escore de postura defensiva fixo."""
 
 from __future__ import annotations
 

@@ -12,16 +12,16 @@ triagem** para a equipe especializada. A decisão final é sempre humana.
 flowchart LR
     S(["Gravação da consulta<br/>áudio + vídeo, mesma sessão"])
     subgraph AUDIO["Ramo de áudio"]
-        A1["A1 · Transcrição (STT)<br/>Azure + fallback offline — P3"]
-        A2["A2 · PLN por regras<br/>tipo de relato, local, tempo — P3"]
-        A3["A3 · Sofrimento na voz<br/>wav2vec2 PT-BR — P2"]
+        A1["A1 · Transcrição (STT)<br/>Azure + fallback offline"]
+        A2["A2 · PLN por regras<br/>tipo de relato, local, tempo"]
+        A3["A3 · Sofrimento na voz<br/>wav2vec2 PT-BR"]
     end
     subgraph VIDEO["Ramo de vídeo"]
-        V1["V1 · Pessoas e tracks<br/>YOLOv8 + ByteTrack — P5"]
-        V2["V2 · Postura defensiva<br/>YOLOv8-pose + GradientBoosting — P5"]
-        V3["V3 · Desconforto facial<br/>ViT pré-treinado em FER — P4"]
+        V1["V1 · Pessoas e tracks<br/>YOLOv8 + ByteTrack"]
+        V2["V2 · Postura defensiva<br/>YOLOv8-pose + GradientBoosting"]
+        V3["V3 · Desconforto facial<br/>ViT pré-treinado em FER"]
     end
-    CD["C/D · Fusão por sessão<br/>escore ponderado — P1"]
+    CD["C/D · Fusão por sessão<br/>escore ponderado"]
     OUT(["Nota de triagem<br/>decisão final humana"])
     S --> A1 --> A2 --> CD
     S --> A3 --> CD
@@ -40,7 +40,6 @@ flowchart LR
 | **A\*** | módulo do ramo de áudio (A1, A2, A3) |
 | **V\*** | módulo do ramo de vídeo (V1, V2, V3) |
 | **C/D** | correlação e decisão — a fusão dos sinais |
-| **P\*** | papel no time (P1…P5) |
 
 Cada módulo devolve um número entre 0 e 1 (ou um JSON pequeno), e a fusão os combina numa única
 nota. **Os seis módulos rodam reais** — os stubs continuam como rede de segurança, acionados por
@@ -49,7 +48,7 @@ nota. **Os seis módulos rodam reais** — os stubs continuam como rede de segur
 No diagrama: STT¹, PLN², FER³, YOLOv8⁴ e ByteTrack⁵.
 
 Os contratos JSON de cada módulo estão em `src/contracts/` e são **imutáveis a partir da Etapa 2** —
-é o que permite cada P trabalhar em paralelo sem quebrar o vizinho.
+é o que permite o trabalho em paralelo sem quebrar o vizinho.
 
 ---
 
@@ -98,7 +97,7 @@ Requer [uv](https://docs.astral.sh/uv/) e Python 3.11+.
 
 ```bash
 uv sync
-cp .env.example .env   # preencha AZURE_SPEECH_KEY / AZURE_SPEECH_REGION (P3)
+cp .env.example .env   # preencha AZURE_SPEECH_KEY / AZURE_SPEECH_REGION
 ```
 
 ## 4. Módulos e modelos

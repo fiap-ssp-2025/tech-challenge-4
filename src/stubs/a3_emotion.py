@@ -1,4 +1,4 @@
-"""A3 emotion stub — fixed sofrimento score."""
+"""Stub A3 emotion — escore de sofrimento fixo."""
 
 from __future__ import annotations
 

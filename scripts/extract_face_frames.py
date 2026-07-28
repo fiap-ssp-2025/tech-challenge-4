@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Extract face crops from RAVDESS/CREMA-D videos for V3 FER (T104 — data only).
+"""Extrai recortes de rosto de vídeos RAVDESS/CREMA-D para V3 FER (T104 — só dados).
 
 Pipeline:
-  1. Walk raw videos under data/video_consulta/raw/{ravdess,cremad}/.
-  2. Keep emotions in {neutral, calm, fearful, sad} (binary desconforto|neutro).
-  3. Prefer RAVDESS full-AV (modality 01); sample up to N frames per clip.
-  4. Detect face (YOLOv8 person → upper-body crop, or OpenCV Haar).
-  5. Save JPG crops under data/video_consulta/processed/faces/.
-  6. Write labels.csv with path,emotion,actor,dataset,label,split,sex.
-  7. Split POR ATOR (female-first stratification).
+  1. Percorre vídeos brutos em data/video_consulta/raw/{ravdess,cremad}/.
+  2. Mantém emoções em {neutral, calm, fearful, sad} (binário desconforto|neutro).
+  3. Prefere RAVDESS full-AV (modalidade 01); amostra até N frames por clipe.
+  4. Detecta rosto (YOLOv8 person → recorte do tronco superior, ou OpenCV Haar).
+  5. Salva JPGs em data/video_consulta/processed/faces/.
+  6. Escreve labels.csv com path,emotion,actor,dataset,label,split,sex.
+  7. Split POR ATOR (estratificação com prioridade feminina).
 """
 
 from __future__ import annotations
@@ -68,7 +68,7 @@ def iter_videos(ravdess_dir: Path, cremad_dir: Path):
             if meta is None:
                 continue
             if meta["modality"] != "01":
-                continue  # full-AV only
+                continue  # só full-AV
             if emotion_to_binary(meta["emotion"]) is None:
                 continue
             yield mp4, meta
@@ -82,7 +82,7 @@ def iter_videos(ravdess_dir: Path, cremad_dir: Path):
 
     if video_flash.is_dir():
         for vid in sorted(list(video_flash.glob("*.flv")) + list(video_flash.glob("*.mp4"))):
-            # Skip LFS pointers
+            # Pula ponteiros LFS
             if vid.stat().st_size < 2048:
                 continue
             try:
@@ -175,7 +175,7 @@ def main() -> int:
                 f"{meta['dataset']}_{meta['actor'].split('_', 1)[-1]}_"
                 f"{meta['emotion']}_{video_path.stem}_f{fi:02d}.jpg"
             )
-            # sanitize
+            # sanitiza o nome
             out_name = re.sub(r"[^A-Za-z0-9_.-]", "_", out_name)
             out_path = args.out_dir / out_name
             cv2.imwrite(str(out_path), crop, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
@@ -205,7 +205,7 @@ def main() -> int:
         ActorInfo(actor_id=a, sex=sex, dataset=ds)
         for (a, sex, ds), _ in df.groupby(["actor", "sex", "dataset"])
     ]
-    # Prefer unique actor entries
+    # Prefere entradas únicas de ator
     uniq: dict[str, ActorInfo] = {}
     for a in actors:
         uniq[a.actor_id] = a
@@ -216,7 +216,7 @@ def main() -> int:
     cols = ["path", "emotion", "actor", "dataset", "label", "split", "sex"]
     df = df[cols]
 
-    # Drop JPGs not kept after balancing (verify requires 1:1 count).
+    # Remove JPGs não mantidos após o balanceamento (verify exige contagem 1:1).
     keep_names = {Path(p).name for p in df["path"]}
     for jpg in args.out_dir.glob("*.jpg"):
         if jpg.name not in keep_names:

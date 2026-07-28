@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""T112 (P4) — fine-tune FER binario (desconforto vs neutro) sobre frames RAVDESS/CREMA-D.
+"""T112 — ajuste fino FER binário (desconforto vs neutro) sobre frames RAVDESS/CREMA-D.
 
 Protocolo herdado do T110: treino no split `train`, selecao de checkpoint e limiar no
 `val`, teste avaliado UMA vez para o vencedor da varredura. Split por ator vem pronto
@@ -33,7 +33,7 @@ from sklearn.utils.class_weight import compute_class_weight
 from torch.utils.data import DataLoader, Dataset
 from torchvision import models, transforms
 
-LABELS = ["neutro", "desconforto"]  # index 1 = classe de interesse (contrato V3)
+LABELS = ["neutro", "desconforto"]  # índice 1 = classe de interesse (contrato V3)
 LABEL2ID = {label: i for i, label in enumerate(LABELS)}
 IMG_SIZE = 224
 NORM_MEAN = [0.485, 0.456, 0.406]  # ImageNet
@@ -47,14 +47,14 @@ VIT_NORM_STD = [0.5, 0.5, 0.5]
 FER_CHECKPOINT = "trpakov/vit-face-expression"
 
 SWEEPS = {
-    # Round 1: qual arquitetura/lr aprende a tarefa.
+    # Rodada 1: qual arquitetura/lr aprende a tarefa.
     "v1": [
         {"arch": "resnet18", "lr": 3e-4},
         {"arch": "resnet18", "lr": 1e-4},
         {"arch": "efficientnet_b0", "lr": 3e-4},
         {"arch": "efficientnet_b0", "lr": 1e-4},
     ],
-    # Round 2: o v1 decorou identidades (loss de treino despenca, val cai após ~ep5).
+    # Rodada 2: o v1 decorou identidades (loss de treino despenca, val cai após ~ep5).
     # Aqui todas as configs atacam isso — augment forte, label smoothing e congelamento.
     "v2": [
         {"arch": "efficientnet_b0", "lr": 3e-4, "aug": "strong", "smooth": 0.1},
@@ -62,8 +62,8 @@ SWEEPS = {
         {"arch": "efficientnet_b0", "lr": 3e-4, "aug": "strong", "smooth": 0.2, "freeze": 2},
         {"arch": "resnet18", "lr": 1e-4, "aug": "strong", "smooth": 0.1, "freeze": 5},
     ],
-    # Round 3 (Rota B): backbone pre-treinado em FER + base sem `calm`.
-    # O CONTROLE existe de proposito: e a config vencedora do round 1, inalterada,
+    # Rodada 3 (Rota B): backbone pre-treinado em FER + base sem `calm`.
+    # O CONTROLE existe de proposito: e a config vencedora da rodada 1, inalterada,
     # rodando na base limpa. Sem ele nao da para saber se o ganho veio do rotulo
     # (item 2) ou do backbone (item 1) — mudariamos duas variaveis de uma vez.
     "v3": [

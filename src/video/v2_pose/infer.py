@@ -1,4 +1,4 @@
-"""V2 pose — YOLOv8n-pose + scikit-learn posture head (P5)."""
+"""V2 pose — YOLOv8n-pose + cabeça de postura scikit-learn."""
 
 from __future__ import annotations
 
@@ -12,10 +12,10 @@ from src.contracts import V2Result, validate_v2
 _pose_model = None
 _clf = None
 
-# parents[3] = repo root (src/video/v2_pose/infer.py → src/video → src → root)
+# parents[3] = raiz do repo (src/video/v2_pose/infer.py → src/video → src → raiz)
 MODEL_PATH = Path(__file__).resolve().parents[3] / "models" / "v2_posture_head.pkl"
 
-# COCO indices
+# índices COCO
 _NOSE = 0
 _L_SHOULDER, _R_SHOULDER = 5, 6
 _L_ELBOW,    _R_ELBOW    = 7, 8
@@ -36,7 +36,7 @@ def _get_clf():
     if _clf is None:
         if not MODEL_PATH.exists():
             raise FileNotFoundError(
-                f"Posture model not found: {MODEL_PATH}\n"
+                f"Modelo de postura não encontrado: {MODEL_PATH}\n"
                 "Run: uv run python scripts/train_v2_posture.py"
             )
         import joblib
@@ -51,8 +51,8 @@ def _angle_at_b(a: np.ndarray, b: np.ndarray, c: np.ndarray) -> float:
 
 
 def _engineer(kps_raw: np.ndarray) -> np.ndarray:
-    """(N, 51) raw keypoints → (N, 43) normalised + geometric features.
-    Must mirror scripts/train_v2_posture.py::engineer_features exactly.
+    """(N, 51) keypoints brutos → (N, 43) normalizados + features geométricas.
+    Deve espelhar exatamente scripts/train_v2_posture.py::engineer_features.
     """
     kps = kps_raw.reshape(-1, 17, 3)
     N = len(kps)
@@ -106,10 +106,10 @@ def _extract_keypoints(video_path: Path, max_frames: int = 30) -> list[np.ndarra
 
 
 def infer(path: str | Path) -> V2Result:
-    """Estimate defensive posture score [0..1] from video."""
+    """Estima o escore de postura defensiva [0..1] a partir do vídeo."""
     video_path = Path(path)
     if not video_path.is_file():
-        raise FileNotFoundError(f"Video not found: {video_path}")
+        raise FileNotFoundError(f"Vídeo não encontrado: {video_path}")
 
     keypoints_list = _extract_keypoints(video_path)
     if not keypoints_list:

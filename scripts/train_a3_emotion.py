@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Fine-tune wav2vec2 PT-BR for voice emotion (neutral vs non_neutral) — A3 (P2).
+"""Ajuste fino do wav2vec2 PT-BR para emoção na voz (neutral vs non_neutral) — A3.
 
-Input:  data/audio_ptbr/labels.csv  (path,label,speaker,split from preprocess_audio.py)
-Output: models/a3_emotion/          (HF model + feature extractor)
-        models/a3_emotion/metrics.json
+Entrada:  data/audio_ptbr/labels.csv  (path,label,speaker,split de preprocess_audio.py)
+Saída:    models/a3_emotion/          (modelo HF + feature extractor)
+          models/a3_emotion/metrics.json
 
-Base checkpoint: jonatasgrosman/wav2vec2-large-xlsr-53-portuguese — same lineage as
-the CORAA SER shared-task baselines (wav2vec2-xlsr-53 fine-tuned on PT-BR speech).
+Checkpoint base: jonatasgrosman/wav2vec2-large-xlsr-53-portuguese — mesma linhagem
+dos baselines da shared-task CORAA SER (wav2vec2-xlsr-53 ajustado em fala PT-BR).
 
-Hardware note: this box has no GPU (see torch.cuda.is_available()). Full fine-tuning
-of all 24 transformer layers (315M params) is impractical on CPU, so the feature
-encoder (CNN) is frozen and only the top N transformer blocks + classification head
-are trained — standard partial fine-tuning for compute-constrained wav2vec2 SER.
+Nota de hardware: esta máquina não tem GPU (ver torch.cuda.is_available()). Fine-tune
+completo das 24 camadas transformer (315M params) é inviável em CPU, então o feature
+encoder (CNN) fica congelado e só os N blocos transformer do topo + cabeça de
+classificação são treinados — fine-tune parcial padrão para wav2vec2 SER com pouco
+compute.
 
-Usage:
+Uso:
     uv run python scripts/train_a3_emotion.py
     uv run python scripts/train_a3_emotion.py --epochs 12 --trainable-layers 6
 """
@@ -44,7 +45,7 @@ DEFAULT_LABELS = ROOT / "data" / "audio_ptbr" / "labels.csv"
 DEFAULT_MODEL_DIR = ROOT / "models" / "a3_emotion"
 
 BASE_CHECKPOINT = "jonatasgrosman/wav2vec2-large-xlsr-53-portuguese"
-TARGET_SR = 16_000  # model's native rate; processed CORAA wavs are 8 kHz, resampled up here
+TARGET_SR = 16_000  # taxa nativa do modelo; wavs CORAA processados estão em 8 kHz e sobem aqui
 MAX_DURATION_S = 6.0
 MAX_SAMPLES = int(TARGET_SR * MAX_DURATION_S)
 LABELS = ["neutral", "non_neutral"]
@@ -60,9 +61,9 @@ def load_audio(rel_path: str) -> np.ndarray:
 
 
 def build_dataset(df: pd.DataFrame, feature_extractor: AutoFeatureExtractor) -> Dataset:
-    # Map label -> int at the pandas level: if the "label" column keeps its original
-    # string Feature type, datasets.Dataset.map() below would cast our int back to
-    # string to match it (silent int->"0"/"1" corruption).
+    # Mapeia label -> int no pandas: se a coluna "label" mantiver o Feature type
+    # string original, o datasets.Dataset.map() abaixo converteria o int de volta
+    # para string (corrupção silenciosa int->"0"/"1").
     prepared = df[["path", "label"]].copy()
     prepared["label"] = prepared["label"].map(LABEL2ID)
     ds = Dataset.from_pandas(prepared.reset_index(drop=True))
@@ -102,7 +103,7 @@ def freeze_backbone(model: Wav2Vec2ForSequenceClassification, n_trainable_layers
 
 
 class WeightedTrainer(Trainer):
-    """Cross-entropy with class weights — train split is ~3.9:1 neutral:non_neutral."""
+    """Cross-entropy com pesos de classe — split de treino ~3,9:1 neutral:non_neutral."""
 
     def __init__(self, *args, class_weights: torch.Tensor | None = None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -155,9 +156,9 @@ def main() -> int:
         id2label=ID2LABEL,
     )
     freeze_backbone(model, args.trainable_layers)
-    # Gradient checkpointing + a frozen feature encoder means the checkpointed
-    # segment's input tensor has requires_grad=False by default -> no gradient
-    # flows at all. enable_input_require_grads() fixes that.
+    # Gradient checkpointing + feature encoder congelado faz o tensor de entrada
+    # do segmento checkpointado ter requires_grad=False por padrão -> nenhum
+    # gradiente flui. enable_input_require_grads() corrige isso.
     model.enable_input_require_grads()
 
     print("Preparing datasets (resample 8kHz -> 16kHz, extract features) ...")
@@ -181,7 +182,7 @@ def main() -> int:
         per_device_train_batch_size=args.batch_size,
         per_device_eval_batch_size=args.batch_size,
         gradient_accumulation_steps=args.grad_accum,
-        gradient_checkpointing=True,  # trade compute for peak RAM -- shared CPU box, unattended run
+        gradient_checkpointing=True,  # troca compute por pico de RAM — CPU compartilhada, run sem supervisão
         gradient_checkpointing_kwargs={"use_reentrant": False},
         learning_rate=args.lr,
         eval_strategy="epoch",

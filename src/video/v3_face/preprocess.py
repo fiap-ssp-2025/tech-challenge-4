@@ -1,9 +1,10 @@
-"""Face-crop preprocessing shared by dataset extraction (T104) and inference (T112).
+"""Pré-processamento de recorte de rosto compartilhado pela extração do dataset (T104)
+e pela inferência (T112).
 
-Train/serve skew guard: `scripts/extract_face_frames.py` (dataset build) and
-`src/video/v3_face/infer.py` (real-time inference) must call the same crop
-function. Resize/normalization used at train time will be added here once
-the T112 training script defines them.
+Guarda contra skew treino/serviço: `scripts/extract_face_frames.py` (construção do
+dataset) e `src/video/v3_face/infer.py` (inferência em tempo real) devem chamar a
+mesma função de recorte. Resize/normalização usados no treino serão adicionados
+aqui quando o script de treino T112 os definir.
 """
 
 from __future__ import annotations
@@ -17,17 +18,17 @@ import numpy as np
 def crop_face_yolo(
     frame: np.ndarray, model: Any, conf: float, margin: float = 0.15
 ) -> np.ndarray | None:
-    """Detect single person, crop upper region as face proxy (RAVDESS/CREMA frontal)."""
+    """Detecta uma pessoa, recorta a região superior como proxy de rosto (RAVDESS/CREMA frontal)."""
     results = model(frame, verbose=False, conf=conf)
     result = results[0]
     if result.boxes is None or len(result.boxes) == 0:
         return None
-    # Largest box
+    # Maior box
     boxes = result.boxes.xyxy.cpu().numpy()
     areas = (boxes[:, 2] - boxes[:, 0]) * (boxes[:, 3] - boxes[:, 1])
     x1, y1, x2, y2 = boxes[int(areas.argmax())]
     h = y2 - y1
-    # Upper 55% of person box ≈ face+shoulders for acted close-ups
+    # 55% superiores da box da pessoa ≈ rosto+ombros em close-ups atuados
     face_y2 = y1 + h * 0.55
     w = x2 - x1
     x1m = max(0, int(x1 - margin * w))
