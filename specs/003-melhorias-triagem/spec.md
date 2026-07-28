@@ -42,7 +42,15 @@ estiver disponível, **para** que a ausência de credencial ou de rede não derr
   áudio inteiro como hoje, **registrando o motivo no log**
 - **WHEN** a diarização devolve um único locutor **THEN** não há chamada extra de inferência
 
-### US-3 — Não identificar pessoas
+### US-3 — Somar sinais que significam a mesma coisa
+**Como** equipe de triagem, **quero** que os sinais dos módulos entrem na nota numa escala
+comum, **para** que um sinal fraco de um módulo rigoroso não seja confundido com ausência de
+sinal.
+- **WHEN** um modelo tem fronteira de decisão medida diferente de 0,5 **THEN** seu escore é
+  recolocado numa escala em que 0,5 é aquela fronteira, antes da soma ponderada
+- **WHEN** um modelo não tem fronteira medida **THEN** assume-se 0,5 e a calibração é identidade
+
+### US-4 — Não identificar pessoas
 **Como** responsável pelo projeto, **quero** que o sistema **não** tente descobrir *quem* é a
 paciente, **para** não introduzir decisão sobre identidade nem tratar dado biométrico além do
 necessário.
@@ -57,6 +65,9 @@ necessário.
 | RF-22 | Falha ou ausência de diarização ⇒ comportamento atual, com motivo logado | must |
 | RF-23 | Trechos menores que a janela do modelo (6 s) são concatenados por locutor antes de pontuar | must |
 | RF-24 | Nenhuma tentativa de identificar papéis (paciente/profissional) ou identidade | must |
+| RF-25 | A fusão calibra cada saída de modelo para que 0,5 seja a fronteira de decisão dele, antes da soma ponderada | must |
+| RF-26 | Os limiares usados vêm dos arquivos versionados em `models/`, e um teste guarda a sincronia | must |
+| RF-27 | `relato` **não** é calibrado — é mapa discreto documentado, não saída de classificador | must |
 
 ## Requisitos não funcionais
 
@@ -76,6 +87,23 @@ necessário.
   está entrando em congelamento. Registrado como trabalho futuro.
 - Identificar qual locutor é a paciente.
 - Retreinar o A3.
+
+## Decisão registrada — por que esta calibração e não outra
+
+O método canônico para isto é **Platt scaling** ou **regressão isotônica**: ajustar uma curva
+sobre um conjunto de calibração para que a saída vire probabilidade de fato. É estatisticamente
+mais rigoroso.
+
+Optamos pela **ancoragem no limiar** (regra de três em dois trechos) por três razões:
+
+1. usa um número **já medido e versionado** — o limiar da validação de cada modelo;
+2. é uma conta que qualquer integrante refaz no papel, o que atende ao Princípio VII;
+3. não exige conjunto de calibração novo nem artefato treinado por módulo, num momento em que
+   o projeto entra em congelamento.
+
+O custo: a saída **não** é probabilidade calibrada no sentido estatístico — 0,7 não significa
+"70% dos casos assim são positivos". Ela é um **índice de risco comparável entre módulos**, que é
+o que a soma ponderada precisa. Declarar isso no relatório.
 
 ## Perguntas em aberto
 
