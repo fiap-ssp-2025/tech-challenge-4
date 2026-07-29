@@ -52,9 +52,14 @@ projeto foram atingidas.
 | V3 (desconforto facial) | F1 macro ≥ 0,70 | 0,7108    |
 | V2 (postura defensiva)  | reportar        | 0,6868    |
 
-Além das métricas de conjunto de teste, o sistema foi aplicado ao primeiro minuto de uma ocorrência
-real de violência doméstica, uma ligação de emergência gravada em telefonia. O módulo de voz
-produziu escore 0,479.
+Além das métricas de conjunto de teste, o sistema foi aplicado a cinco gravações de validação,
+entre elas o primeiro minuto de uma ocorrência real de violência doméstica registrada em telefonia.
+O módulo de voz produziu escore 0,479 nesse caso, valor que corresponde a 2,8 vezes o limiar de
+decisão do modelo.
+
+A Seção 7 apresenta ainda uma comparação controlada em que o mesmo vídeo e o mesmo roteiro foram
+processados com áudio sintético e com voz humana gravada, isolando o efeito da origem do áudio
+sobre o módulo de voz.
 
 ---
 
@@ -251,19 +256,67 @@ V3, 1,5 s.
 
 ## 7. Resultados ponta a ponta
 
-Foram avaliadas quatro gravações, cobrindo material sintético, atuado e real. As três primeiras
-possuem áudio e vídeo; a quarta é uma ligação telefônica e exercita apenas o ramo de áudio.
+Foram avaliadas cinco gravações, cobrindo material sintético, atuado e real. As quatro primeiras
+possuem áudio e vídeo; a última é uma ligação telefônica e exercita apenas o ramo de áudio. Os
+travessões indicam módulos sem entrada disponível, não módulos com falha. Os valores de voz e face
+são as saídas brutas dos modelos; o escore final incorpora a calibração da Seção 5.7.
 
-| Caso              | Origem        | Relato (A2)            | Voz (A3) | Face (V3) | Postura (V2) | Escore |
-| ----------------- | ------------- | ---------------------- | -------- | --------- | ------------ | ------ |
-| Consulta A        | gerada por IA | `violencia_domestica`  | 0,02     | 0,95      | 0,64         | 0,64   |
-| Denúncia          | gerada por IA | `sofrimento_emocional` | 0,02     | 0,99      | 0,57         | 0,52   |
-| Consulta simulada | atuada        | `violencia_domestica`  | 0,04     | 1,00      | 0,08         | 0,53   |
-| Ocorrência real   | ligação real  | `outro`                | 0,479    | —         | —            | —      |
+| Caso                        | Origem                        | Relato (A2)            | Voz (A3) | Face (V3) | Postura (V2) | Escore |
+| --------------------------- | ----------------------------- | ---------------------- | -------- | --------- | ------------ | ------ |
+| Consulta A                  | gerada por IA                 | `violencia_domestica`  | 0,02     | 0,95      | 0,64         | 0,64   |
+| Denúncia                    | gerada por IA                 | `sofrimento_emocional` | 0,02     | 0,99      | 0,57         | 0,52   |
+| Consulta simulada           | atuada                        | `violencia_domestica`  | 0,04     | 1,00      | 0,08         | 0,53   |
+| Consulta B (áudio sintético)| gerada por IA                 | `violencia_domestica`  | 0,02     | 0,94      | 0,67         | 0,645  |
+| Consulta B (áudio humano)   | vídeo gerado + voz gravada    | `violencia_domestica`  | 0,06     | 0,94      | 0,67         | 0,676  |
+| Ocorrência real             | ligação real                  | `outro`                | 0,479    | —         | —            | —      |
 
-### 7.1 Desempenho do módulo de voz em material real
+O módulo A2 classificou corretamente como `violencia_domestica` e extraiu contexto (`em casa`) e
+tempo (`semana passada`) em todos os casos de consulta, incluindo o de áudio humano, no qual a
+transcrição apresentou pequenas imprecisões decorrentes da fala emocionada.
 
-Nas três primeiras gravações, o módulo de voz produziu valores entre 0,02 e 0,04. Aplicado ao
+### 7.1 Efeito da origem do áudio sobre o módulo de voz
+
+As duas variantes da Consulta B compartilham o mesmo vídeo e o mesmo roteiro, diferindo apenas na
+origem do áudio. A comparação isola, portanto, o efeito da natureza da voz sobre o A3. A tabela
+apresenta o valor máximo entre as janelas de 6 s, medido sobre o áudio integral, e sua posição na
+distribuição de referência do CORAA.
+
+| Áudio                                            | Máximo por janela | Acima de % dos neutros |
+| ------------------------------------------------ | ----------------- | ---------------------- |
+| Consulta A (voz sintética)                        | 0,024             | 54,0%                  |
+| Consulta B (voz sintética, com direção emocional) | 0,048             | 74,0%                  |
+| Consulta B (voz humana gravada)                   | **0,144**         | **93,6%**              |
+| Ocorrência real (voz humana, situação real)       | **0,479**         | **97,4%**              |
+
+A progressão é consistente: a voz humana gravada produziu escore seis vezes superior ao da primeira
+síntese, e a voz humana em situação real, vinte vezes superior. O reforço de direção emocional no
+prompt de geração dobrou o escore da voz sintética, mas não alterou a ordem de grandeza.
+
+A interpretação é que a síntese de voz reproduz os marcadores perceptuais de sofrimento (pausas,
+quebras de entonação, variação de ritmo) sem reproduzir os correlatos acústicos sobre os quais o
+wav2vec2 foi ajustado a partir de fala espontânea. Registra-se a consequência prática: **modelos de
+emoção treinados em voz humana não podem ser avaliados com voz sintetizada**.
+
+### 7.2 Efeito da separação de locutores sobre o escore entregue
+
+No caso de áudio humano, o valor máximo medido sobre o áudio integral foi 0,144, enquanto o
+pipeline entregou 0,062. A diferença decorre da separação de locutores descrita na Seção 5.3: ao
+concatenar os trechos de cada falante, as fronteiras das janelas de 6 s são refeitas, e a janela que
+continha o máximo deixa de existir.
+
+| Agregação                          | Escore |
+| ---------------------------------- | ------ |
+| Áudio integral, sem separação      | 0,144  |
+| Locutor 1 (7,1 s de fala)          | 0,021  |
+| Locutor 2 (7,6 s de fala)          | 0,062  |
+| Pipeline (máximo entre locutores)  | 0,062  |
+
+A separação de locutores, portanto, não é monotônica em relação ao processamento do áudio integral.
+O comportamento está documentado na especificação da funcionalidade e é discutido na Seção 9.
+
+### 7.3 Desempenho do módulo de voz em material real
+
+Nas gravações com voz sintética, o módulo produziu valores entre 0,02 e 0,04. Aplicado ao
 primeiro minuto de uma ligação real de violência doméstica (gravação telefônica, 8 kHz, codec GSM),
 o A3 produziu escore 0,479.
 
@@ -285,7 +338,7 @@ teste. Voz sintetizada não reproduz as características acústicas da fala huma
 qual o modelo foi treinado, e simulações encenadas por não atores carregam pouco do sinal
 prosódico correspondente.
 
-### 7.2 Limitações identificadas no mesmo teste
+### 7.4 Limitações identificadas no mesmo teste
 
 Na ligação real, o processo de separação de locutores agrupou vítima e atendente como um único
 falante. A consequência é mensurável: o caminho com separação produziria escore 0,102, contra 0,479
@@ -350,8 +403,19 @@ foi baixo.
 
 **Vocabulário incompleto.** A ameaça de morte não está coberta pelos termos implementados.
 
-**Separação de locutores em áudio comprimido.** O mecanismo funciona em áudio de boa qualidade, mas
-agrupou dois falantes em um único na gravação telefônica.
+**Separação de locutores.** O mecanismo apresentou duas limitações distintas. Em áudio telefônico
+comprimido, agrupou dois falantes em um único, provavelmente pela redução das diferenças de timbre
+introduzida pelo codec. Em áudio de boa qualidade, a separação funciona, mas o reagrupamento dos
+trechos por falante refaz as fronteiras das janelas de análise e pode descartar o trecho de maior
+escore: na Consulta B com voz humana, o valor máximo do áudio integral era 0,144 e o pipeline
+entregou 0,062 (Seção 7.2). A separação não é, portanto, monotônica em relação ao processamento do
+áudio integral.
+
+**Instabilidade de rastreamento em vídeo sintético.** Na Consulta B, o V1 registrou seis
+identificadores de pessoa em uma cena com duas participantes. A inspeção dos rastros mostra três
+com centenas de quadros e três fragmentos, padrão compatível com perda e recriação de identificador
+causada por inconsistências de aparência entre quadros gerados. O campo `n_pessoas` não integra o
+cálculo do escore, de modo que o resultado final não é afetado.
 
 **Dimensão dos conjuntos de teste.** O conjunto do A3 possui 101 áudios, dos quais 23 positivos, e
 o do V3, 669 clipes. As metas foram atingidas, não superadas com margem: a incerteza estimada é da
