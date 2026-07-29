@@ -3,7 +3,7 @@
 Fonte da verdade: `AGENTS.md` + `specs/002-triagem-consulta/`.
 
 **Relatório técnico:** [`docs/relatorio-tecnico.md`](docs/relatorio-tecnico.md)
-**Vídeo de demonstração:** `[INSERIR LINK DO YOUTUBE — não listado]`
+**Vídeo de demonstração:** https://youtu.be/a_dszZMtY3k
 **Modelos publicados (Hugging Face, privados sob a org):**
 [tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) · [tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial)
 

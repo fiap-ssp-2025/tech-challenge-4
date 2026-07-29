@@ -6,7 +6,7 @@
 **Data:** 28 de julho de 2026
 
 **Repositório:** https://github.com/fiap-ssp-2025/tech-challenge-4
-**Vídeo de demonstração:** `[INSERIR LINK DO YOUTUBE — vídeo não listado]`
+**Vídeo de demonstração:** https://youtu.be/a_dszZMtY3k
 **Modelos publicados:** [tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) · [tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial)
 (Hugging Face, repositórios privados sob a organização do grupo)
 
