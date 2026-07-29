@@ -1,6 +1,6 @@
 # Spec: Triagem Multimodal em Consultas — Saúde da Mulher
 
-> **Status:** in-progress
+> **Status:** done
 > **Branch:** `feat/002-triagem-consulta`
 > **Criado em:** 2026-07-23
 > **Substitui:** `specs/001-despacho-audio-video` (superseded — reancoragem ao contexto hospitalar por orientação do professor)

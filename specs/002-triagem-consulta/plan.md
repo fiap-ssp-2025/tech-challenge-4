@@ -1,6 +1,6 @@
 # Plan: Triagem Multimodal em Consultas — Saúde da Mulher
 
-> Referência: `specs/002-triagem-consulta/spec.md` · **Status:** in-progress
+> Referência: `specs/002-triagem-consulta/spec.md` · **Status:** done
 > Herda da 001 tudo que não conflita: papéis P1–P5, Etapas 1–5, contratos-primeiro, stubs, go/no-go, congelamento.
 
 ## O que muda vs 001 (delta)

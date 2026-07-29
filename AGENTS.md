@@ -15,7 +15,7 @@ Este repositório usa **Spec-Driven Development (SDD)**. A fonte da verdade é a
 
 Se não houver feature ativa e o usuário pedir implementação: **crie a spec primeiro** (fluxo specify → plan → tasks).
 
-Hoje: feature ativa = `specs/002-triagem-consulta/` (`in-progress`). A `001-despacho-audio-video` está `superseded` (arquivo histórico — não implementar).
+Hoje: **não há feature ativa** — 002 e 003 estão `done` (entrega de julho/2026) e a 001 está `superseded` (arquivo histórico, não implementar). Trabalho novo começa por uma spec nova.
 
 ## Fluxo obrigatório
 

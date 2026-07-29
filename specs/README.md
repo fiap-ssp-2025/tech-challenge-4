@@ -22,7 +22,7 @@ Use os templates em `.specify/templates/`.
 | NNN | Slug | Status |
 |-----|------|--------|
 | 001 | despacho-audio-video | superseded |
-| 002 | triagem-consulta | in-progress |
-| 003 | melhorias-triagem | in-progress |
+| 002 | triagem-consulta | done |
+| 003 | melhorias-triagem | done |
 
-Feature ativa: **002-triagem-consulta**. Ao criar uma feature nova, adicione uma linha nesta tabela.
+Todas as features estão `done` (entrega de julho/2026). Ao criar uma feature nova, adicione uma linha nesta tabela.

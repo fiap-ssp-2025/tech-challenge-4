@@ -1,9 +1,9 @@
 # Spec: Melhorias de Triagem — separação de locutores no ramo de áudio
 
-> **Status:** in-progress
+> **Status:** done
 > **Branch:** `feat/003-diarizacao-a3`
 > **Criado em:** 2026-07-26
-> **Depende de:** `specs/002-triagem-consulta` (in-progress) — esta feature **não** altera contratos.
+> **Depende de:** `specs/002-triagem-consulta` (done) — esta feature **não** altera contratos.
 
 ## Visão
 

@@ -84,7 +84,8 @@
     `specs/README.md` atualizados. Declarações do RNF-06 consolidadas na ata do go/no-go.
 
 ## Fechamento SDD
-- [ ] T190 Status `done` em spec/plan; specs/README atualizado; revisar código × spec
-  - **Relatório técnico (T031) escrito:** `docs/relatorio-tecnico.md` — 10 seções, ~3.000 palavras,
-    com as 5 declarações obrigatórias do RNF-06 e os resultados dos 4 casos de teste. Falta cada P
-    revisar a seção do seu módulo (5.1–5.7).
+- [x] T190 Status `done` em spec/plan; specs/README atualizado; revisar código × spec
+  - **Verificado (28/07):** `spec.md` e `plan.md` da 002 em `done`; índice em `specs/README.md`
+    atualizado; código e contratos conferidos contra a spec (6 módulos reais, contratos v2
+    intactos, `pytest` 77 verde). Relatório técnico em `docs/relatorio-tecnico.md` e ata do
+    go/no-go em `docs/go-no-go-etapa3.md`.

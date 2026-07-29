@@ -1,6 +1,6 @@
 # Plan: Melhorias de Triagem — separação de locutores e calibração de escala
 
-> Referência: `specs/003-melhorias-triagem/spec.md` · **Status:** in-progress
+> Referência: `specs/003-melhorias-triagem/spec.md` · **Status:** done
 
 ## Decisão de arquitetura
 
