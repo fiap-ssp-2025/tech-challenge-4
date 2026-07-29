@@ -4,6 +4,8 @@ Fonte da verdade: `AGENTS.md` + `specs/002-triagem-consulta/`.
 
 **Relatório técnico:** [`docs/relatorio-tecnico.md`](docs/relatorio-tecnico.md)
 **Vídeo de demonstração:** `[INSERIR LINK DO YOUTUBE — não listado]`
+**Modelos publicados (Hugging Face, privados sob a org):**
+[tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) · [tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial)
 
 ## 1. O Projeto
 
@@ -113,10 +115,10 @@ treinado ou a credencial, `src/resolve.py` cai para eles e loga o motivo. Nenhum
 |--------|--------|-------------------------|--------|---------|-----------|
 | **A1** | Transcrição (STT) | Azure Speech; fallback **faster-whisper** (offline) | nuvem Azure + pacote local | — | credencial no `.env`; whisper no cache do pacote |
 | **A2** | PLN por regras | regras determinísticas (sem ML) | código do repositório | — | `src/audio/a2_nlp/` |
-| **A3** | Sofrimento na voz | **wav2vec2-large-xlsr-53** fine-tuned em PT-BR (`jonatasgrosman/…`) — encoder de fala, não é LLM | Hugging Face `fiap-ssp-2025/tc4-a3-sofrimento-voz` (privado) | ~1,2 GB | `models/a3_emotion/` (download) |
+| **A3** | Sofrimento na voz | **wav2vec2-large-xlsr-53** fine-tuned em PT-BR (`jonatasgrosman/…`) — encoder de fala, não é LLM | [Hugging Face](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) (privado) | ~1,2 GB | `models/a3_emotion/` (download) |
 | **V1** | Pessoas e tracks | **YOLOv8n** + **ByteTrack** (CNN ultralytics) | ultralytics, no primeiro uso | ~6 MB | cache local (`yolov8n.pt`) |
 | **V2** | Postura defensiva | **YOLOv8n-pose** + **Gradient Boosting** (scikit-learn) sobre keypoints — ML clássico, não é LLM | YOLO: ultralytics; cabeça: treino local (RAVDESS) | ~12 MB + ~700 KB | cache (`yolov8n-pose.pt`) + `models/v2_posture_head.pkl` **(no git)** |
-| **V3** | Desconforto facial | **ViT-base** fine-tuned a partir de `trpakov/vit-face-expression` — vision transformer, não é LLM | Hugging Face `fiap-ssp-2025/tc4-v3-desconforto-facial` (privado) | ~343 MB | `models/v3_face/` (download) |
+| **V3** | Desconforto facial | **ViT-base** fine-tuned a partir de `trpakov/vit-face-expression` — vision transformer, não é LLM | [Hugging Face](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial) (privado) | ~343 MB | `models/v3_face/` (download) |
 | **C/D** | Fusão por sessão | regras + escore ponderado (sem ML) | código do repositório | — | `src/fusion/` |
 
 Métricas de treino ficam no git (`models/*_metrics.json`). Demais pesos (`*.pt`, `*.bin`,

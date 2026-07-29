@@ -7,6 +7,8 @@
 
 **Repositório:** https://github.com/fiap-ssp-2025/tech-challenge-4
 **Vídeo de demonstração:** `[INSERIR LINK DO YOUTUBE — vídeo não listado]`
+**Modelos publicados:** [tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) · [tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial)
+(Hugging Face, repositórios privados sob a organização do grupo)
 
 ---
 
@@ -242,7 +244,9 @@ uv run python -m src.run_event --audio consulta.wav --video consulta.mp4 --sessi
 ```
 
 Pesos com mais de 5 MB não são versionados no repositório; permanecem em repositórios privados da
-organização no Hugging Face, com script de download idempotente. As métricas de cada modelo, essas
+organização no Hugging Face, com script de download idempotente: o A3 em
+[tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) e o V3 em [tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial). O acesso exige papel
+`read` na organização, restrição decorrente das licenças dos conjuntos de origem (Seção 8.3). As métricas de cada modelo, essas
 sim, são versionadas como evidência.
 
 O projeto conta com 77 testes automatizados.
@@ -419,5 +423,8 @@ Conference on Computer Vision*, 2022.
 
 Ultralytics YOLOv8. Disponível em: https://github.com/ultralytics/ultralytics.
 
-Checkpoints utilizados: `jonatasgrosman/wav2vec2-large-xlsr-53-portuguese` (base do A3) e
-`trpakov/vit-face-expression` (base do V3), ambos disponíveis no Hugging Face Hub.
+Checkpoints de origem: [`jonatasgrosman/wav2vec2-large-xlsr-53-portuguese`](https://huggingface.co/jonatasgrosman/wav2vec2-large-xlsr-53-portuguese) (base do A3) e
+[`trpakov/vit-face-expression`](https://huggingface.co/trpakov/vit-face-expression) (base do V3).
+
+Modelos resultantes deste trabalho: [`fiap-ssp-2025/tc4-a3-sofrimento-voz`](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) e
+[`fiap-ssp-2025/tc4-v3-desconforto-facial`](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial).
