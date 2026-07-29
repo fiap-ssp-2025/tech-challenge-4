@@ -2,12 +2,14 @@
 
 ## Triagem Multimodal em Consultas: Saúde da Mulher
 
-**Grupo:** Marcelo Arruda de Siqueira · Leonardo Barbosa Nogueira · Jose Flavio Neto · Pedro Matias dos Santos · Wellington Oliveira de Andrade
+**Grupo:** Marcelo Arruda de Siqueira · Leonardo Barbosa Nogueira · Jose Flavio Neto ·
+Pedro Matias dos Santos · Wellington Oliveira de Andrade  
 **Data:** 28 de julho de 2026
 
-**Repositório:** https://github.com/fiap-ssp-2025/tech-challenge-4
-**Vídeo de demonstração:** https://youtu.be/a_dszZMtY3k
-**Modelos publicados:** [tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) · [tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial)
+**Repositório:** https://github.com/fiap-ssp-2025/tech-challenge-4  
+**Vídeo de demonstração:** https://youtu.be/a_dszZMtY3k  
+**Modelos publicados:** [tc4-a3-sofrimento-voz](https://huggingface.co/fiap-ssp-2025/tc4-a3-sofrimento-voz) ·
+[tc4-v3-desconforto-facial](https://huggingface.co/fiap-ssp-2025/tc4-v3-desconforto-facial)
 (Hugging Face, repositórios privados sob a organização do grupo)
 
 ---
@@ -300,6 +302,40 @@ valor máximo (Seção 5.3).
 As duas variantes da Consulta B, que compartilham vídeo e roteiro e diferem apenas na origem do
 áudio, permitem isolar o efeito da natureza da voz: o valor máximo por janela passou de 0,048 com
 voz sintética para 0,144 com voz humana gravada. A Seção 9 discute a implicação.
+
+### 7.2 Exemplos de anomalias detectadas
+
+Define-se como anomalia o desvio, em qualquer canal, do padrão esperado de uma consulta sem
+indício de violência: relato sem menção a agressão, prosódia neutra, expressão facial neutra e
+postura relaxada. A tabela reúne as anomalias efetivamente detectadas nas gravações de validação,
+com o valor medido e a origem.
+
+| Canal | Anomalia | Critério | Caso e valor medido |
+| ----- | -------- | -------- | ------------------- |
+| Texto (A2) | Relato de agressão ou ameaça | termo do vocabulário de violência na transcrição | Consulta B: "ele me empurrou contra a parede", "ele me ameaçou" ⇒ `violencia_domestica`, contexto `em casa`, tempo `semana passada` |
+| Voz (A3) | Prosódia de sofrimento | escore acima do limiar 0,17 | Ocorrência real: **0,479** (2,8× o limiar) |
+| Rosto (V3) | Expressão de desconforto sustentada | escore alto e estável entre quadros | Consulta simulada: **1,00**, com 12 de 12 quadros detectados; Consulta B: **0,94** |
+| Corpo (V2) | Postura defensiva | escore da cabeça de classificação | Consulta B: **0,67** |
+| Cena (V1) | Presença de acompanhante | mais de uma pessoa no enquadramento | 2 pessoas nas consultas simuladas |
+| Fusão (C/D) | Combinação de sinais | soma ponderada dos sinais calibrados | Consulta B com voz humana: **0,676** |
+
+**Localização temporal da anomalia.** No caso da ocorrência real, o sistema não apenas atribuiu
+escore elevado ao conjunto: o perfil por janelas de 6 s mostra o sinal concentrado em momentos
+específicos da chamada, com vales entre eles.
+
+| Janela | 0–6 s | 6–12 s | 12–18 s | 18–24 s | 24–30 s | 30–36 s | 36–42 s | 42–48 s | 48–54 s | 54–60 s |
+| ------ | ----- | ------ | ------- | ------- | ------- | ------- | ------- | ------- | ------- | ------- |
+| Escore | 0,030 | 0,074  | **0,479** | 0,031 | 0,147 | 0,025 | **0,175** | 0,049 | **0,434** | 0,053 |
+
+Três janelas ultrapassaram o limiar de decisão. A distribuição episódica indica *quando* o sinal
+ocorreu, informação operacionalmente mais útil que um valor agregado, e sustenta a agregação por
+valor máximo adotada na Seção 5.3.
+
+**Anomalia não detectada.** Em gravação na qual a interlocutora sinaliza risco sem empregar termos
+do vocabulário implementado, o módulo A2 classificou o caso como `outro` e o escore resultante foi
+baixo. O sistema também deixou de reconhecer a expressão "está querendo me matar" na ocorrência
+real, pois o vocabulário cobre agressão física e ameaça genérica, mas não ameaça de morte. Ambos
+os casos delimitam a fronteira de detecção do sistema e estão discutidos na Seção 9.
 
 ---
 
