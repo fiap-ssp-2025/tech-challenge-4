@@ -2,6 +2,9 @@
 
 Fonte da verdade: `AGENTS.md` + `specs/002-triagem-consulta/`.
 
+**Relatório técnico:** [`docs/relatorio-tecnico.md`](docs/relatorio-tecnico.md)
+**Vídeo de demonstração:** `[INSERIR LINK DO YOUTUBE — não listado]`
+
 ## 1. O Projeto
 
 A gravação de uma consulta (presencial ou teleconsulta, PT-BR) alimenta dois ramos — áudio e

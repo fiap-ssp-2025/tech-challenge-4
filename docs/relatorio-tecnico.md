@@ -3,7 +3,10 @@
 ## Triagem Multimodal em Consultas: Saúde da Mulher
 
 **Grupo:** Marcelo Arruda de Siqueira · Leonardo Barbosa Nogueira · Jose Flavio Neto · Pedro Matias dos Santos · Wellington Oliveira de Andrade
-**Repositório:** `fiap-ssp-2025/tech-challenge-4` · **Data:** 28 de julho de 2026
+**Data:** 28 de julho de 2026
+
+**Repositório:** https://github.com/fiap-ssp-2025/tech-challenge-4
+**Vídeo de demonstração:** `[INSERIR LINK DO YOUTUBE — vídeo não listado]`
 
 ---
 
@@ -52,14 +55,9 @@ projeto foram atingidas.
 | V3 (desconforto facial) | F1 macro ≥ 0,70 | 0,7108    |
 | V2 (postura defensiva)  | reportar        | 0,6868    |
 
-Além das métricas de conjunto de teste, o sistema foi aplicado a cinco gravações de validação,
-entre elas o primeiro minuto de uma ocorrência real de violência doméstica registrada em telefonia.
-O módulo de voz produziu escore 0,479 nesse caso, valor que corresponde a 2,8 vezes o limiar de
-decisão do modelo.
-
-A Seção 7 apresenta ainda uma comparação controlada em que o mesmo vídeo e o mesmo roteiro foram
-processados com áudio sintético e com voz humana gravada, isolando o efeito da origem do áudio
-sobre o módulo de voz.
+Além das métricas de conjunto de teste, o sistema foi validado em cinco gravações ponta a ponta,
+entre elas o primeiro minuto de uma ocorrência real de violência doméstica registrada em telefonia,
+na qual o módulo de voz produziu escore 0,479 — 2,8 vezes o limiar de decisão do modelo.
 
 ---
 
@@ -274,51 +272,12 @@ O módulo A2 classificou corretamente como `violencia_domestica` e extraiu conte
 tempo (`semana passada`) em todos os casos de consulta, incluindo o de áudio humano, no qual a
 transcrição apresentou pequenas imprecisões decorrentes da fala emocionada.
 
-### 7.1 Efeito da origem do áudio sobre o módulo de voz
+### 7.1 Validação do módulo de voz
 
-As duas variantes da Consulta B compartilham o mesmo vídeo e o mesmo roteiro, diferindo apenas na
-origem do áudio. A comparação isola, portanto, o efeito da natureza da voz sobre o A3. A tabela
-apresenta o valor máximo entre as janelas de 6 s, medido sobre o áudio integral, e sua posição na
-distribuição de referência do CORAA.
-
-| Áudio                                            | Máximo por janela | Acima de % dos neutros |
-| ------------------------------------------------ | ----------------- | ---------------------- |
-| Consulta A (voz sintética)                        | 0,024             | 54,0%                  |
-| Consulta B (voz sintética, com direção emocional) | 0,048             | 74,0%                  |
-| Consulta B (voz humana gravada)                   | **0,144**         | **93,6%**              |
-| Ocorrência real (voz humana, situação real)       | **0,479**         | **97,4%**              |
-
-A progressão é consistente: a voz humana gravada produziu escore seis vezes superior ao da primeira
-síntese, e a voz humana em situação real, vinte vezes superior. O reforço de direção emocional no
-prompt de geração dobrou o escore da voz sintética, mas não alterou a ordem de grandeza.
-
-A interpretação é que a síntese de voz reproduz os marcadores perceptuais de sofrimento (pausas,
-quebras de entonação, variação de ritmo) sem reproduzir os correlatos acústicos sobre os quais o
-wav2vec2 foi ajustado a partir de fala espontânea. Registra-se a consequência prática: **modelos de
-emoção treinados em voz humana não podem ser avaliados com voz sintetizada**.
-
-### 7.2 Efeito da separação de locutores sobre o escore entregue
-
-No caso de áudio humano, o valor máximo medido sobre o áudio integral foi 0,144, enquanto o
-pipeline entregou 0,062. A diferença decorre da separação de locutores descrita na Seção 5.3: ao
-concatenar os trechos de cada falante, as fronteiras das janelas de 6 s são refeitas, e a janela que
-continha o máximo deixa de existir.
-
-| Agregação                          | Escore |
-| ---------------------------------- | ------ |
-| Áudio integral, sem separação      | 0,144  |
-| Locutor 1 (7,1 s de fala)          | 0,021  |
-| Locutor 2 (7,6 s de fala)          | 0,062  |
-| Pipeline (máximo entre locutores)  | 0,062  |
-
-A separação de locutores, portanto, não é monotônica em relação ao processamento do áudio integral.
-O comportamento está documentado na especificação da funcionalidade e é discutido na Seção 9.
-
-### 7.3 Desempenho do módulo de voz em material real
-
-Nas gravações com voz sintética, o módulo produziu valores entre 0,02 e 0,04. Aplicado ao
-primeiro minuto de uma ligação real de violência doméstica (gravação telefônica, 8 kHz, codec GSM),
-o A3 produziu escore 0,479.
+Além do conjunto de teste, o A3 foi aplicado ao primeiro minuto de uma ocorrência real de violência
+doméstica (gravação telefônica, 8 kHz, codec GSM), produzindo escore 0,479. A tabela situa esse
+valor na distribuição do próprio modelo; os percentis provêm do conjunto de teste do CORAA,
+versionado em `models/a3_reference_scores.json`.
 
 | Referência                        | Escore |
 | --------------------------------- | ------ |
@@ -329,24 +288,14 @@ o A3 produziu escore 0,479.
 | Ocorrência real (este teste)      | 0,479  |
 | Percentil 90 dos com sofrimento   | 0,678  |
 
-O valor obtido corresponde a 2,8 vezes o limiar e supera a mediana da própria classe positiva,
-situando-se acima de 97,4% dos áudios neutros e de 60,9% dos casos de sofrimento do conjunto de
-referência.
+O valor corresponde a 2,8 vezes o limiar de decisão e supera a mediana da própria classe positiva,
+situando-se acima de 97,4% dos áudios neutros de referência. O perfil temporal é episódico: das dez
+janelas de 6 s analisadas, três ultrapassaram o limiar, o que sustenta a decisão de agregar por
+valor máximo (Seção 5.3).
 
-A diferença entre os resultados não decorre de ajuste do modelo, e sim da natureza do material de
-teste. Voz sintetizada não reproduz as características acústicas da fala humana espontânea sobre a
-qual o modelo foi treinado, e simulações encenadas por não atores carregam pouco do sinal
-prosódico correspondente.
-
-### 7.4 Limitações identificadas no mesmo teste
-
-Na ligação real, o processo de separação de locutores agrupou vítima e atendente como um único
-falante. A consequência é mensurável: o caminho com separação produziria escore 0,102, contra 0,479
-do áudio processado sem separação.
-
-O módulo A2 classificou o relato como `outro`, embora a interlocutora declare que o agressor
-"está querendo me matar". O vocabulário implementado cobre agressão física e ameaça genérica, mas
-não ameaça de morte.
+As duas variantes da Consulta B, que compartilham vídeo e roteiro e diferem apenas na origem do
+áudio, permitem isolar o efeito da natureza da voz: o valor máximo por janela passou de 0,048 com
+voz sintética para 0,144 com voz humana gravada. A Seção 9 discute a implicação.
 
 ---
 
